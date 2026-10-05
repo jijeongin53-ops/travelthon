@@ -41,7 +41,7 @@ export default function OverviewSection() {
           </h2>
           <p className="text-slate-400 text-base leading-relaxed">
             ‘트래블톤(Travelthon)’은 여행(Travel)과 해커톤(Hackathon)의 결합어로, 부산의 다채로운 매력과 디지털 신기술, 
-            로컬 크리에이터의 감성을 융합하여 실현 가능한 미래형 관광 솔루션을 30시간 동안 완성하는 대회입니다.
+            로컬 크리에이터의 감성을 융합하여 실현 가능한 미래형 관광 솔루션을 2일간 완성하는 대회입니다.
           </p>
         </div>
 
@@ -73,7 +73,7 @@ export default function OverviewSection() {
             </div>
             <h3 className="text-lg font-bold text-white mb-2">상금 + 후속 사업화 지원</h3>
             <p className="text-sm text-slate-400 leading-relaxed">
-              총 상금 3,000만원과 더불어 부산관광공사 상품화 실증비 지원, 부산관광기업지원센터 입주 우선권 등의 특전이 제공됩니다.
+              총 상금 300만원과 더불어 부산관광공사 상품화 실증비 지원, 부산관광기업지원센터 입주 우선권 등의 특전이 제공됩니다.
             </p>
           </div>
         </div>

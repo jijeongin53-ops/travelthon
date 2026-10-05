@@ -26,7 +26,7 @@ export default function Footer({ onScrollToTop }: FooterProps) {
               </span>
             </div>
             <p className="text-slate-400 max-w-md text-xs leading-relaxed">
-              부산의 매력적인 로컬 자원과 디지털 기술이 결합된 지속 가능한 미래 관광 비즈니스를 창조하는 무박 2일 메이커톤입니다.
+              부산의 매력적인 로컬 자원과 디지털 기술이 결합된 지속 가능한 미래 관광 비즈니스를 창조하는 2일간의 메이커톤입니다.
             </p>
           </div>
 

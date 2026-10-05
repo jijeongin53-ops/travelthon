@@ -24,7 +24,7 @@ export default function TimelineSection() {
             <span>시상 및 수상 혜택</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
-            총 상금 3,000만원 & 창업 육성 특전
+            총 상금 300만원 & 창업 육성 특전
           </h2>
           <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
             단순 상금 수여를 넘어, 여러분의 우수한 아이디어가 실제 부산의 관광 상품과 스타트업으로 도약할 수 있도록 전폭 지원합니다.

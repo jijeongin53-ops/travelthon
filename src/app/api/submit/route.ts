@@ -43,6 +43,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 팀 참가 필수 검증 (개인 참가 불가)
+    if (!teamName || teamName.trim() === '' || teamName === '개인 참가') {
+      return NextResponse.json(
+        { success: false, message: '팀 명을 입력해 주세요 (본 대회는 개인 참가 불가, 팀 참가 필수입니다).' },
+        { status: 400 }
+      );
+    }
+
+    if (!teamMembers || teamMembers.length < 1) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: '본 대회는 개인 참가가 불가하며, 대표자 외에 팀원을 최소 1명 이상 등록해야 합니다 (2~4인 팀).',
+        },
+        { status: 400 }
+      );
+    }
+
     if (!agreePrivacy || !agreeThirdParty) {
       return NextResponse.json(
         { success: false, message: '필수 개인정보 약관에 모두 동의해 주셔야 접수가 가능합니다.' },

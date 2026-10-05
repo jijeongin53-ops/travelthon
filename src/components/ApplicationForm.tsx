@@ -31,7 +31,7 @@ interface ApplicationFormProps {
 }
 
 export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormProps) {
-  // 대표자 정보
+  // 대표자(팀장) 정보
   const [name, setName] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [university, setUniversity] = useState('');
@@ -39,9 +39,17 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
 
-  // 팀 정보
+  // 팀 정보 (개인 참가 불가, 팀 참가 필수: 최소 1명의 팀원 기본 세팅)
   const [teamName, setTeamName] = useState('');
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
+    {
+      id: 'member-1',
+      name: '',
+      birthDate: '',
+      university: '',
+      graduationStatus: 'enrolled',
+    },
+  ]);
 
   // 파일 상태
   const [applicationFile, setApplicationFile] = useState<File | null>(null);
@@ -73,7 +81,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
 
   const isAllAgreed = agreePrivacy && agreeThirdParty && agreeNotice;
 
-  // 팀원 추가 (최대 3명 추가 가능: 대표자 포함 4인 팀)
+  // 팀원 추가 (최대 3명 추가 가능: 대표자 포함 최대 4인 팀)
   const handleAddMember = () => {
     if (teamMembers.length >= 3) {
       alert('팀원은 대표자 포함 최대 4인까지 구성할 수 있습니다.');
@@ -89,8 +97,12 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
     setTeamMembers([...teamMembers, newMember]);
   };
 
-  // 팀원 삭제
+  // 팀원 삭제 (팀원은 최소 1명 이상 유지)
   const handleRemoveMember = (id: string) => {
+    if (teamMembers.length <= 1) {
+      alert('본 공모전은 팀 참가 필수(개인 불가)이므로 최소 1명 이상의 팀원이 필요합니다.');
+      return;
+    }
     setTeamMembers(teamMembers.filter((m) => m.id !== id));
   };
 
@@ -117,9 +129,15 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
     e.preventDefault();
     setErrorMessage('');
 
-    // 필수 항목 검증
+    // 팀명 필수 검증
+    if (!teamName.trim()) {
+      setErrorMessage('팀 명을 반드시 입력해 주세요 (본 대회는 팀 참가 필수입니다).');
+      return;
+    }
+
+    // 대표자 필수 항목 검증
     if (!name.trim()) {
-      setErrorMessage('대표자 이름을 입력해 주세요.');
+      setErrorMessage('대표자(팀장) 이름을 입력해 주세요.');
       return;
     }
     if (!birthDate) {
@@ -135,7 +153,13 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
       return;
     }
     if (!email.trim() || !email.includes('@')) {
-      setErrorMessage('유효한 이메일 주소를 입력해 주세요.');
+      setErrorMessage('유효한 대표자 이메일 주소를 입력해 주세요.');
+      return;
+    }
+
+    // 팀원 인원 검증 (개인 참가 불가 -> 최소 1명 이상의 팀원 필요)
+    if (teamMembers.length < 1) {
+      setErrorMessage('본 대회는 개인 참가가 불가합니다. 팀원을 최소 1명 이상 등록해 주세요 (대표자 포함 2인 이상).');
       return;
     }
 
@@ -143,7 +167,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
     for (let i = 0; i < teamMembers.length; i++) {
       const m = teamMembers[i];
       if (!m.name.trim() || !m.birthDate || !m.university.trim()) {
-        setErrorMessage(`팀원 ${i + 1}의 모든 정보(이름, 생년월일, 대학, 졸업유무)를 입력해 주세요.`);
+        setErrorMessage(`팀원 ${i + 1}의 모든 정보(이름, 생년월일, 대학, 졸업유무)를 빠짐없이 입력해 주세요.`);
         return;
       }
     }
@@ -164,7 +188,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
       formData.append('graduationStatus', graduationStatus);
       formData.append('phone', phone.trim());
       formData.append('email', email.trim());
-      formData.append('teamName', teamName.trim() || `${name} 팀`);
+      formData.append('teamName', teamName.trim());
       formData.append('teamMembers', JSON.stringify(teamMembers));
       formData.append('agreePrivacy', String(agreePrivacy));
       formData.append('agreeThirdParty', String(agreeThirdParty));
@@ -219,7 +243,15 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
     setPhone('');
     setEmail('');
     setTeamName('');
-    setTeamMembers([]);
+    setTeamMembers([
+      {
+        id: 'member-1',
+        name: '',
+        birthDate: '',
+        university: '',
+        graduationStatus: 'enrolled',
+      },
+    ]);
     setApplicationFile(null);
     setProposalFile(null);
     setConsentFile(null);
@@ -239,21 +271,62 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
         <div className="text-center max-w-2xl mx-auto mb-14">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 text-xs font-bold tracking-wider uppercase mb-3 border border-cyan-500/20">
             <UploadCloud className="w-3.5 h-3.5" />
-            <span>온라인 원스톱 접수처</span>
+            <span>온라인 원스톱 팀 접수처</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
             참가 신청 및 서류 제출
           </h2>
           <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-            인적사항 기재와 기획서/동의서 업로드를 완료하시면, 대회 공식 구글 시트와 구글 드라이브에 안전하게 자동 저장됩니다.
+            본 대회는 <strong className="text-cyan-300">팀 단위(2인 이상 4인 이하) 참가 필수</strong>이며, 
+            개인 참가는 불가합니다. 인적사항 기재와 기획서/동의서 업로드를 완료하시면 구글 시트 및 구글 드라이브에 안전하게 자동 저장됩니다.
           </p>
         </div>
 
         {/* 접수 폼 카드 컨테이너 */}
         <div className="p-6 sm:p-10 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-2xl backdrop-blur-xl">
           <form onSubmit={handleSubmit} className="space-y-10">
-            {/* 1. 대표자(팀장) 인적사항 */}
+            {/* 팀 참가 필수 안내 배너 */}
+            <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 flex items-center gap-3 text-xs sm:text-sm text-cyan-200">
+              <Info className="w-5 h-5 text-cyan-400 shrink-0" />
+              <span>
+                <strong>[팀 참가 안내]</strong> 대표자(팀장) 외에 <strong>최소 1명 이상의 팀원</strong>(총 2~4인)을 등록하셔야 최종 접수가 가능합니다.
+              </span>
+            </div>
+
+            {/* 1. 팀 기본 정보 (팀명) */}
             <div>
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-teal-500/10 text-teal-400">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">팀 명 (필수)</h3>
+                    <p className="text-xs text-slate-400">활동하실 팀의 공식 명칭을 입력해 주세요.</p>
+                  </div>
+                </div>
+                <span className="text-[11px] font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+                  필수 입력
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-2">
+                  팀 명 <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="예: 부산오딧세이, 해양메이커스 등 팀명을 입력해 주세요"
+                  value={teamName}
+                  onChange={(e) => setTeamName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400 transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* 2. 대표자(팀장) 인적사항 */}
+            <div className="pt-2 border-t border-slate-800">
               <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-6">
                 <div className="flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-blue-500/10 text-cyan-400">
@@ -278,7 +351,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
                   <input
                     type="text"
                     required
-                    placeholder="홍길동"
+                    placeholder="대표자 성명"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400 transition-colors"
@@ -363,7 +436,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
               </div>
             </div>
 
-            {/* 2. 팀 정보 및 팀원 입력 섹션 */}
+            {/* 3. 팀원 입력 섹션 (최소 1명 이상 필수) */}
             <div className="pt-4 border-t border-slate-800">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 mb-6 gap-3">
                 <div className="flex items-center gap-2">
@@ -371,8 +444,8 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
                     <Users className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">팀 구성 및 팀원 추가 (선택)</h3>
-                    <p className="text-xs text-slate-400">개인 참가 시 비워두셔도 되며, 최대 3명까지 팀원을 추가할 수 있습니다.</p>
+                    <h3 className="text-lg font-bold text-white">팀원 정보 입력 (최소 1명 ~ 최대 3명)</h3>
+                    <p className="text-xs text-slate-400">대표자를 제외한 팀원들의 인적사항을 입력해 주세요 (총 2~4인 팀).</p>
                   </div>
                 </div>
 
@@ -387,33 +460,19 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
                 </button>
               </div>
 
-              {/* 팀명 입력 */}
-              <div className="mb-6">
-                <label className="block text-xs font-semibold text-slate-300 mb-2">
-                  팀 명 (개인일 경우 비워두시면 &apos;개인 참가&apos;로 자동 표기됩니다)
-                </label>
-                <input
-                  type="text"
-                  placeholder="예: 부산오딧세이 (또는 개인)"
-                  value={teamName}
-                  onChange={(e) => setTeamName(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-400 transition-colors"
-                />
-              </div>
-
               {/* 팀원 카드 목록 */}
-              {teamMembers.length > 0 && (
-                <div className="space-y-4">
-                  {teamMembers.map((member, index) => (
-                    <div
-                      key={member.id}
-                      className="p-5 rounded-2xl bg-slate-950/80 border border-slate-800 relative space-y-4 animate-in fade-in duration-200"
-                    >
-                      <div className="flex items-center justify-between pb-2 border-b border-slate-850">
-                        <span className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
-                          <Users className="w-3.5 h-3.5" />
-                          <span>팀원 {index + 1}</span>
-                        </span>
+              <div className="space-y-4">
+                {teamMembers.map((member, index) => (
+                  <div
+                    key={member.id}
+                    className="p-5 rounded-2xl bg-slate-950/80 border border-slate-800 relative space-y-4 animate-in fade-in duration-200"
+                  >
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-850">
+                      <span className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5" />
+                        <span>팀원 {index + 1} {index === 0 && <span className="text-[10px] text-rose-400">(필수)</span>}</span>
+                      </span>
+                      {teamMembers.length > 1 && (
                         <button
                           type="button"
                           onClick={() => handleRemoveMember(member.id)}
@@ -422,89 +481,89 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
                           <Trash2 className="w-3.5 h-3.5" />
                           <span>삭제</span>
                         </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                      {/* 팀원 이름 */}
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                          이름 <span className="text-rose-400">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="팀원 성명"
+                          value={member.name}
+                          onChange={(e) =>
+                            handleUpdateMember(member.id, 'name', e.target.value)
+                          }
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none"
+                        />
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                        {/* 팀원 이름 */}
-                        <div>
-                          <label className="block text-[11px] font-medium text-slate-400 mb-1">
-                            이름
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="팀원 성명"
-                            value={member.name}
-                            onChange={(e) =>
-                              handleUpdateMember(member.id, 'name', e.target.value)
-                            }
-                            className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none"
-                          />
-                        </div>
+                      {/* 팀원 생년월일 */}
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                          생년월일 <span className="text-rose-400">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          required
+                          value={member.birthDate}
+                          onChange={(e) =>
+                            handleUpdateMember(member.id, 'birthDate', e.target.value)
+                          }
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none [color-scheme:dark]"
+                        />
+                      </div>
 
-                        {/* 팀원 생년월일 */}
-                        <div>
-                          <label className="block text-[11px] font-medium text-slate-400 mb-1">
-                            생년월일
-                          </label>
-                          <input
-                            type="date"
-                            required
-                            value={member.birthDate}
-                            onChange={(e) =>
-                              handleUpdateMember(member.id, 'birthDate', e.target.value)
-                            }
-                            className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none [color-scheme:dark]"
-                          />
-                        </div>
+                      {/* 팀원 출신대학 */}
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                          출신 대학 <span className="text-rose-400">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="대학교명"
+                          value={member.university}
+                          onChange={(e) =>
+                            handleUpdateMember(member.id, 'university', e.target.value)
+                          }
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none"
+                        />
+                      </div>
 
-                        {/* 팀원 출신대학 */}
-                        <div>
-                          <label className="block text-[11px] font-medium text-slate-400 mb-1">
-                            출신 대학
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="대학교명"
-                            value={member.university}
-                            onChange={(e) =>
-                              handleUpdateMember(member.id, 'university', e.target.value)
-                            }
-                            className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none"
-                          />
-                        </div>
-
-                        {/* 팀원 졸업유무 */}
-                        <div>
-                          <label className="block text-[11px] font-medium text-slate-400 mb-1">
-                            졸업 유무
-                          </label>
-                          <select
-                            value={member.graduationStatus}
-                            onChange={(e) =>
-                              handleUpdateMember(
-                                member.id,
-                                'graduationStatus',
-                                e.target.value as GraduationStatus
-                              )
-                            }
-                            className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none cursor-pointer"
-                          >
-                            <option value="enrolled">재학</option>
-                            <option value="leave_of_absence">휴학</option>
-                            <option value="expected_graduation">졸업예정</option>
-                            <option value="graduated">졸업</option>
-                          </select>
-                        </div>
+                      {/* 팀원 졸업유무 */}
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                          졸업 유무 <span className="text-rose-400">*</span>
+                        </label>
+                        <select
+                          value={member.graduationStatus}
+                          onChange={(e) =>
+                            handleUpdateMember(
+                              member.id,
+                              'graduationStatus',
+                              e.target.value as GraduationStatus
+                            )
+                          }
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-400 focus:outline-none cursor-pointer"
+                        >
+                          <option value="enrolled">재학</option>
+                          <option value="leave_of_absence">휴학</option>
+                          <option value="expected_graduation">졸업예정</option>
+                          <option value="graduated">졸업</option>
+                        </select>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* 3. 파일 업로드 섹션 */}
+            {/* 4. 파일 업로드 섹션 */}
             <div className="pt-4 border-t border-slate-800">
               <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-6">
                 <div className="flex items-center gap-2">
@@ -685,7 +744,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
               </div>
             </div>
 
-            {/* 4. 개인정보 약관 동의 및 서약 */}
+            {/* 5. 개인정보 약관 동의 및 서약 */}
             <div className="pt-4 border-t border-slate-800">
               <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
                 <div className="flex items-center gap-2">
@@ -694,7 +753,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-white">개인정보 동의 및 유의사항 확인</h3>
-                    <p className="text-xs text-slate-400">원활한 심사 진행을 위해 약관에 동의해 주세요.</p>
+                    <p className="text-xs text-slate-400">원활한 심사 진행을 위해 팀원 전원 동의를 확인해 주세요.</p>
                   </div>
                 </div>
               </div>
@@ -771,7 +830,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
                       className="w-4 h-4 text-cyan-500 rounded border-slate-700 bg-slate-900 focus:ring-cyan-400"
                     />
                     <span>
-                      <strong className="text-cyan-400">[필수]</strong> 대회 유의사항 확인 및 기재사항이 사실임을 확인합니다.
+                      <strong className="text-cyan-400">[필수]</strong> 대회 유의사항 확인 및 기재사항이 사실임을 확인합니다 (팀 참가 필수).
                     </span>
                   </label>
                 </div>
@@ -801,7 +860,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
                 ) : (
                   <>
                     <Sparkles className="w-5 h-5" />
-                    <span>2026 글로컬 부산관광 트래블톤 참가 신청 완료하기</span>
+                    <span>2026 글로컬 부산관광 트래블톤 팀 참가 신청 완료하기</span>
                   </>
                 )}
               </button>
@@ -828,7 +887,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
                 접수 완료
               </span>
               <h3 className="text-2xl font-black text-white mt-2">
-                참가 신청이 성공적으로 접수되었습니다!
+                팀 참가 신청이 성공적으로 접수되었습니다!
               </h3>
               <p className="text-xs sm:text-sm text-slate-400 mt-1">
                 2026 글로컬 부산관광 트래블톤 공모전에 도전해 주셔서 감사합니다.
@@ -867,7 +926,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
                 <span className="font-semibold text-white">{successData.details?.leaderName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">총 인원:</span>
+                <span className="text-slate-500">총 팀원 수:</span>
                 <span className="font-semibold text-white">{successData.details?.memberCount}명</span>
               </div>
               <div className="flex justify-between">

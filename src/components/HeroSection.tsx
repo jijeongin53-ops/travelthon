@@ -94,7 +94,7 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
         <p className="max-w-3xl mx-auto text-base sm:text-lg md:text-xl text-slate-300 font-light leading-relaxed mb-10">
           부산의 아름다운 해양과 원도심 골목, 첨단 AI 기술이 융합된 신개념 관광 비즈니스 모델을 찾습니다.
           <br className="hidden sm:inline" />
-          전국 청년·대학생·메이커들이 함께하는 <strong className="text-cyan-300 font-semibold">무박 2일간의 열정적인 아이디어 항해</strong>에 지금 도전하세요!
+          전국 청년·대학생·메이커들이 함께하는 <strong className="text-cyan-300 font-semibold">2일간의 열정적인 아이디어 항해</strong>에 지금 도전하세요!
         </p>
 
         {/* D-Day 카운트다운 타이머 카드 */}
@@ -142,7 +142,7 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
             className="w-full sm:w-auto px-7 py-3.5 text-sm sm:text-base font-bold text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-400 hover:from-cyan-300 hover:to-blue-300 rounded-xl transition-all shadow-lg shadow-cyan-500/25 hover:shadow-cyan-400/40 hover:scale-[1.02] flex items-center justify-center gap-2 group cursor-pointer"
           >
             <UploadCloud className="w-5 h-5 text-slate-950 group-hover:-translate-y-0.5 transition-transform" />
-            <span>온라인 참가 신청 & 서류 업로드</span>
+            <span>온라인 팀 참가 신청 & 서류 업로드</span>
             <ArrowRight className="w-4 h-4 text-slate-950 group-hover:translate-x-1 transition-transform" />
           </button>
 
@@ -175,8 +175,8 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
               <Award className="w-4 h-4" />
               <span className="text-xs font-semibold">총 상금 규모</span>
             </div>
-            <div className="text-lg sm:text-xl font-black text-white">3,000만원</div>
-            <p className="text-[11px] text-slate-400">대상 1팀 1,000만원 (부산시장상)</p>
+            <div className="text-lg sm:text-xl font-black text-white">300만원</div>
+            <p className="text-[11px] text-slate-400">대상 1팀 150만원 (부산시장상)</p>
           </div>
 
           <div className="bg-slate-900/50 backdrop-blur-md rounded-xl p-4 border border-slate-800/60 text-left">
@@ -184,17 +184,17 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
               <Calendar className="w-4 h-4" />
               <span className="text-xs font-semibold">본선 트래블톤</span>
             </div>
-            <div className="text-lg sm:text-xl font-black text-white">무박 2일</div>
+            <div className="text-lg sm:text-xl font-black text-white">2일간</div>
             <p className="text-[11px] text-slate-400">부산 벡스코 & 로컬 거점 연계</p>
           </div>
 
           <div className="bg-slate-900/50 backdrop-blur-md rounded-xl p-4 border border-slate-800/60 text-left">
             <div className="flex items-center gap-2 text-teal-400 mb-1">
               <Users className="w-4 h-4" />
-              <span className="text-xs font-semibold">참가 대상</span>
+              <span className="text-xs font-semibold">참가 자격</span>
             </div>
-            <div className="text-lg sm:text-xl font-black text-white">개인 or 팀</div>
-            <p className="text-[11px] text-slate-400">전국 청년·대학생 누구나 (최대 4인)</p>
+            <div className="text-lg sm:text-xl font-black text-white">팀 참가 필수</div>
+            <p className="text-[11px] text-slate-400">2~4인 팀 구성 (개인 참가 불가)</p>
           </div>
 
           <div className="bg-slate-900/50 backdrop-blur-md rounded-xl p-4 border border-slate-800/60 text-left">
