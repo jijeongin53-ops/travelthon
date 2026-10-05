@@ -2,12 +2,14 @@
  * 2026 글로컬 부산관광 트래블톤 공모전
  * Google Apps Script Web App 연동 스크립트
  * 
- * [설치 방법]
+ * [설치 및 헤더 자동 생성 방법]
  * 1. 구글 시트 (https://docs.google.com/spreadsheets/d/1n3zQcOOFtX8Bfr0XXZH9X4DDe_Be3JdzgGCWlCbfH4I/edit) 열기
  * 2. 상단 메뉴 [확장 프로그램] > [Apps Script] 클릭
  * 3. 기존 코드를 모두 지우고 이 파일의 내용을 붙여넣기
- * 4. 상단 [배포] > [새 배포] 클릭
- * 5. 유형 선택: [웹 앱] 선택
+ * 4. 상단 함수 선택 드롭다운에서 [setupSheetHeader] 선택 후 ▶ [실행] 클릭!
+ *    -> 구글 시트에 1행 헤더 항목이 자동으로 예쁘게 생성됩니다!
+ * 5. 상단 [배포] > [새 배포] 클릭
+ *    - 유형 선택: [웹 앱]
  *    - 설명: 트래블톤 접수 웹앱
  *    - 다음 사용자 권한으로 실행: '나(내 계정)'
  *    - 액세스 권한이 있는 사용자: '모든 사용자(Anyone)' 선택 (매우 중요!)
@@ -15,6 +17,50 @@
  */
 
 var DRIVE_FOLDER_ID = "1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId"; // 구글 드라이브 폴더 ID
+
+// 시트 헤더 자동 세팅 함수 (Apps Script에서 'setupSheetHeader' 선택 후 실행 클릭)
+function setupSheetHeader() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getActiveSheet();
+  
+  var headers = [
+    "접수일시",
+    "접수번호",
+    "팀명",
+    "대표자 성명",
+    "생년월일",
+    "출신 대학",
+    "졸업 유무",
+    "연락처",
+    "이메일 주소",
+    "팀원 명단",
+    "개인정보 동의",
+    "제3자 제공 동의",
+    "신청서 파일 링크",
+    "아이디어 계획서 링크",
+    "개인정보 동의서 링크",
+    "접수 상태"
+  ];
+  
+  // 1행에 헤더 추가
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  
+  // 헤더 스타일링 (오션 딥블루 테마, 볼드, 중앙 정렬)
+  var headerRange = sheet.getRange(1, 1, 1, headers.length);
+  headerRange.setBackground("#0f172a");
+  headerRange.setFontColor("#38bdf8");
+  headerRange.setFontWeight("bold");
+  headerRange.setHorizontalAlignment("center");
+  headerRange.setVerticalAlignment("middle");
+  sheet.setRowHeight(1, 40);
+  
+  // 열 너비 자동 조정
+  for (var col = 1; col <= headers.length; col++) {
+    sheet.autoResizeColumn(col);
+  }
+  
+  Logger.log("✅ 시트 헤더가 성공적으로 생성되었습니다!");
+}
 
 function doPost(e) {
   try {
@@ -53,6 +99,11 @@ function doPost(e) {
     // 구글 시트 행 추가
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getActiveSheet();
+    
+    // 시트가 완전히 비어있다면 먼저 헤더를 자동 생성
+    if (sheet.getLastRow() === 0) {
+      setupSheetHeader();
+    }
     
     // 학적 상태 라벨
     var gradLabels = {
