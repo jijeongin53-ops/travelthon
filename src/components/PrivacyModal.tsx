@@ -47,7 +47,7 @@ export default function PrivacyModal({
         </div>
 
         {/* 모달 본문 */}
-        <div className="px-6 py-5 overflow-y-auto text-sm text-slate-300 leading-relaxed space-y-3 font-mono bg-slate-900/90 whitespace-pre-line">
+        <div className="px-6 py-5 overflow-y-auto text-sm text-slate-300 leading-relaxed space-y-3 font-mono bg-slate-900/90 whitespace-pre-line break-keep">
           {content}
         </div>
 

@@ -28,7 +28,17 @@ body {
   color: var(--foreground);
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", Roboto, "Noto Sans KR", sans-serif;
   overflow-x: hidden;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
 }
+
+/* 모든 텍스트 요소에 한글 단어 단위 줄바꿈 유지 적용 */
+h1, h2, h3, h4, h5, h6, p, span, a, button, label, li, input, textarea {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
 
 /* 커스텀 스크롤바 */
 ::-webkit-scrollbar {

@@ -15,36 +15,36 @@ export default function FaqSection() {
     <section id="faq" className="py-24 relative bg-slate-950 border-t border-slate-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 섹션 헤더 */}
-        <div className="text-center max-w-2xl mx-auto mb-14">
+        <div className="text-center max-w-2xl mx-auto mb-14 break-keep">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 text-xs font-bold tracking-wider uppercase mb-3 border border-cyan-500/20">
             <HelpCircle className="w-3.5 h-3.5" />
             <span>FAQ & 지원 안내</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3 break-keep">
             자주 묻는 질문
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+          <p className="text-slate-400 text-sm sm:text-base leading-relaxed break-keep">
             대회 참가 및 신청서 제출과 관련하여 가장 많이 문의하시는 내용입니다.
           </p>
         </div>
 
         {/* 아코디언 리스트 */}
-        <div className="space-y-4 mb-16">
+        <div className="space-y-4 mb-16 break-keep">
           {FAQS.map((faq, idx) => {
             const isOpen = openIdx === idx;
             return (
               <div
                 key={idx}
-                className="rounded-2xl bg-slate-900/70 border border-slate-800 overflow-hidden transition-all"
+                className="rounded-2xl bg-slate-900/70 border border-slate-800 overflow-hidden transition-all break-keep"
               >
                 <button
                   type="button"
                   onClick={() => toggleFaq(idx)}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 hover:bg-slate-800/40 transition-colors"
+                  className="w-full p-5 text-left flex items-center justify-between gap-4 hover:bg-slate-800/40 transition-colors break-keep"
                 >
-                  <span className="font-bold text-white text-sm sm:text-base flex items-center gap-3">
+                  <span className="font-bold text-white text-sm sm:text-base flex items-center gap-3 break-keep">
                     <span className="text-cyan-400 font-mono font-extrabold">Q.</span>
-                    <span>{faq.q}</span>
+                    <span className="break-keep">{faq.q}</span>
                   </span>
                   <ChevronDown
                     className={`w-5 h-5 text-slate-400 transition-transform duration-200 shrink-0 ${
@@ -53,8 +53,8 @@ export default function FaqSection() {
                   />
                 </button>
                 {isOpen && (
-                  <div className="px-5 pb-5 pt-1 text-slate-300 text-xs sm:text-sm leading-relaxed border-t border-slate-800/60 bg-slate-950/40 animate-in fade-in duration-200">
-                    <p className="pl-6 border-l-2 border-cyan-500/50">{faq.a}</p>
+                  <div className="px-5 pb-5 pt-1 text-slate-300 text-xs sm:text-sm leading-relaxed border-t border-slate-800/60 bg-slate-950/40 animate-in fade-in duration-200 break-keep">
+                    <p className="pl-6 border-l-2 border-cyan-500/50 break-keep">{faq.a}</p>
                   </div>
                 )}
               </div>

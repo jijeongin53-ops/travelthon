@@ -14,18 +14,18 @@ export default function Footer({ onScrollToTop }: FooterProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-10 border-b border-slate-800/60">
           {/* 로고 & 슬로건 */}
-          <div className="space-y-3">
+          <div className="space-y-3 break-keep">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-400 p-0.5">
                 <div className="w-full h-full bg-slate-950 rounded-[6px] flex items-center justify-center">
                   <Compass className="w-4 h-4 text-cyan-400" />
                 </div>
               </div>
-              <span className="text-base font-extrabold text-white">
+              <span className="text-base font-extrabold text-white break-keep">
                 2026 글로컬 부산관광 트래블톤 공모전
               </span>
             </div>
-            <p className="text-slate-400 max-w-md text-xs leading-relaxed">
+            <p className="text-slate-400 max-w-md text-xs leading-relaxed break-keep">
               부산의 매력적인 로컬 자원과 디지털 기술이 결합된 지속 가능한 미래 관광 비즈니스를 창조하는 2일간의 메이커톤입니다.
             </p>
           </div>
@@ -66,8 +66,8 @@ export default function Footer({ onScrollToTop }: FooterProps) {
         </div>
 
         {/* 주최/주관 및 하단 저작권 */}
-        <div className="pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-slate-500 text-[11px]">
-          <div className="space-y-1">
+        <div className="pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-slate-500 text-[11px] break-keep">
+          <div className="space-y-1 break-keep">
             <p>주최 : 부산광역시 | 주관 : 부산관광공사, 글로컬 트래블톤 조직위원회</p>
             <p>운영사무국 : 부산광역시 해운대구 APEC로 55, 벡스코 제2전시장 컨벤션센터</p>
             <p>문의전화 : 051-740-0000 | 이메일 : contact@busan-travelthon.kr</p>

@@ -69,32 +69,32 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
         {/* 상단 뱃지 */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold mb-6 shadow-lg shadow-cyan-950/50 backdrop-blur-md">
+        <div className="inline-flex flex-wrap justify-center items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold mb-6 shadow-lg shadow-cyan-950/50 backdrop-blur-md break-keep">
           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
           <span>2026 글로컬(Glocal) 부산 관광의 혁신을 이끌 메이커톤</span>
-          <span className="text-slate-500">|</span>
+          <span className="text-slate-500 hidden sm:inline">|</span>
           <span className="text-amber-400 font-bold">{COMPETITION_INFO.totalPrize}</span>
         </div>
 
         {/* 메인 타이틀 */}
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-tight sm:leading-none mb-6">
-          <span className="block text-slate-300 text-xl sm:text-2xl md:text-3xl font-medium tracking-normal mb-2">
+        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-tight sm:leading-none mb-6 break-keep">
+          <span className="block text-slate-300 text-xl sm:text-2xl md:text-3xl font-medium tracking-normal mb-2 break-keep">
             글로벌과 로컬의 만남, 바다 위의 아이디어톤
           </span>
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-300">
+          <span className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-300">
             2026 글로컬 부산관광
           </span>
           <br className="hidden sm:inline" />
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-emerald-300 sm:ml-4">
+          <span className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-teal-300 to-emerald-300 sm:ml-4">
             트래블톤 공모전
           </span>
         </h1>
 
         {/* 서브 설명 */}
-        <p className="max-w-3xl mx-auto text-base sm:text-lg md:text-xl text-slate-300 font-light leading-relaxed mb-10">
+        <p className="max-w-3xl mx-auto text-base sm:text-lg md:text-xl text-slate-300 font-light leading-relaxed mb-10 break-keep">
           부산의 아름다운 해양과 원도심 골목, 첨단 AI 기술이 융합된 신개념 관광 비즈니스 모델을 찾습니다.
           <br className="hidden sm:inline" />
-          전국 청년·대학생·메이커들이 함께하는 <strong className="text-cyan-300 font-semibold">2일간의 열정적인 아이디어 항해</strong>에 지금 도전하세요!
+          {' '}전국 청년·대학생·메이커들이 함께하는 <strong className="text-cyan-300 font-semibold">2일간의 열정적인 아이디어 항해</strong>에 지금 도전하세요!
         </p>
 
         {/* D-Day 카운트다운 타이머 카드 */}
@@ -169,14 +169,14 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
         </div>
 
         {/* 핵심 통계 및 특전 하단 그리드 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto break-keep">
           <div className="bg-slate-900/50 backdrop-blur-md rounded-xl p-4 border border-slate-800/60 text-left">
             <div className="flex items-center gap-2 text-cyan-400 mb-1">
               <Award className="w-4 h-4" />
               <span className="text-xs font-semibold">총 상금 규모</span>
             </div>
             <div className="text-lg sm:text-xl font-black text-white">300만원</div>
-            <p className="text-[11px] text-slate-400">대상 1팀 150만원 (부산시장상)</p>
+            <p className="text-[11px] text-slate-400 break-keep">대상 1팀 150만원 (부산시장상)</p>
           </div>
 
           <div className="bg-slate-900/50 backdrop-blur-md rounded-xl p-4 border border-slate-800/60 text-left">
@@ -185,7 +185,7 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
               <span className="text-xs font-semibold">본선 트래블톤</span>
             </div>
             <div className="text-lg sm:text-xl font-black text-white">2일간</div>
-            <p className="text-[11px] text-slate-400">부산 벡스코 & 로컬 거점 연계</p>
+            <p className="text-[11px] text-slate-400 break-keep">부산 벡스코 & 로컬 거점 연계</p>
           </div>
 
           <div className="bg-slate-900/50 backdrop-blur-md rounded-xl p-4 border border-slate-800/60 text-left">
@@ -194,7 +194,7 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
               <span className="text-xs font-semibold">참가 자격</span>
             </div>
             <div className="text-lg sm:text-xl font-black text-white">팀 참가 필수</div>
-            <p className="text-[11px] text-slate-400">2~4인 팀 구성 (개인 참가 불가)</p>
+            <p className="text-[11px] text-slate-400 break-keep">2~4인 팀 구성 (개인 참가 불가)</p>
           </div>
 
           <div className="bg-slate-900/50 backdrop-blur-md rounded-xl p-4 border border-slate-800/60 text-left">
@@ -203,7 +203,7 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
               <span className="text-xs font-semibold">사후 지원</span>
             </div>
             <div className="text-lg sm:text-xl font-black text-white">입주 & 멘토링</div>
-            <p className="text-[11px] text-slate-400">부산관광기업지원센터 입주 우대</p>
+            <p className="text-[11px] text-slate-400 break-keep">부산관광기업지원센터 입주 우대</p>
           </div>
         </div>
 

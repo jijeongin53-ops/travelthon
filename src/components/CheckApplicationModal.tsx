@@ -78,16 +78,16 @@ export default function CheckApplicationModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] break-keep">
         {/* 모달 헤더 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/60">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/60 break-keep">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
               <Search className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-white">접수 내역 조회</h3>
-              <p className="text-xs text-slate-400">제출하신 공모전 참가 신청 현황을 확인합니다.</p>
+              <h3 className="text-base sm:text-lg font-bold text-white break-keep">접수 내역 조회</h3>
+              <p className="text-xs text-slate-400 break-keep">제출하신 공모전 참가 신청 현황을 확인합니다.</p>
             </div>
           </div>
           <button

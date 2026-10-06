@@ -113,7 +113,7 @@ export default function Navbar({ onOpenCheckModal, onScrollToSection }: NavbarPr
 
       {/* 모바일 드롭다운 메뉴 */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-slate-950/95 backdrop-blur-xl border-b border-slate-800 px-4 pt-3 pb-5 space-y-2 mt-2">
+        <div className="lg:hidden bg-slate-950/95 backdrop-blur-xl border-b border-slate-800 px-4 pt-3 pb-5 space-y-2 mt-2 break-keep">
           {navLinks.map((link) => (
             <button
               key={link.id}

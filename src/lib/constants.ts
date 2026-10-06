@@ -5,6 +5,12 @@ export const GOOGLE_SHEET_URL =
   'https://docs.google.com/spreadsheets/d/1n3zQcOOFtX8Bfr0XXZH9X4DDe_Be3JdzgGCWlCbfH4I/edit?gid=0#gid=0';
 export const GOOGLE_DRIVE_FOLDER_URL =
   'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId?usp=drive_link';
+// 구글 드라이브 참가서류 파일 링크
+export const GOOGLE_DRIVE_FORM_FILE_URL =
+  'https://drive.google.com/file/d/1DNQkdGU3WRyZR6pKKlXhoQwdS_7Tdplr/view?usp=drive_link';
+export const GOOGLE_DRIVE_FORM_DOWNLOAD_URL =
+  'https://drive.google.com/uc?export=download&id=1DNQkdGU3WRyZR6pKKlXhoQwdS_7Tdplr';
+
 
 // 대회 기본 정보
 export const COMPETITION_INFO = {
@@ -133,6 +139,17 @@ export const SCHEDULE_STEPS = [
 // 다운로드 서식 목록
 export const DOWNLOAD_DOCUMENTS = [
   {
+    id: 'official-form',
+    title: '참가서류 공식 양식 [통합본]',
+    fileType: 'HWP (한글)',
+    size: '48 KB',
+    fileName: '참가서류_글로컬_부산관광_트래블톤.hwp',
+    downloadPath: '/downloads/참가서류_글로컬_부산관광_트래블톤.hwp',
+    driveUrl: GOOGLE_DRIVE_FORM_FILE_URL,
+    description: '참가신청서(팀원 인적사항), 아이디어 소개서, 개인정보동의서, 참가자서약서가 모두 포함된 주최측 공식 통합 서식',
+    badge: '필수 제출',
+  },
+  {
     id: 'announcement',
     title: '2026 글로컬 부산관광 트래블톤 공모요강',
     fileType: 'PDF',
@@ -141,16 +158,6 @@ export const DOWNLOAD_DOCUMENTS = [
     downloadPath: '/downloads/2026_부산관광_트래블톤_공모요강.pdf',
     description: '대회 참가 자격(팀 참가 필수), 심사 기준, 주요일정, 상금(총 300만원) 상세 안내',
     badge: '필독',
-  },
-  {
-    id: 'application-form',
-    title: '참가신청서 양식 [서식 1호]',
-    fileType: 'HWP / DOCX',
-    size: '185 KB',
-    fileName: '참가신청서_양식_서식1호.docx',
-    downloadPath: '/downloads/참가신청서_양식_서식1호.docx',
-    description: '팀명, 대표자 및 팀원 전원(2~4인) 인적사항, 학적사항 기재용 서식',
-    badge: '필수 제출',
   },
   {
     id: 'proposal-form',
@@ -176,10 +183,10 @@ export const DOWNLOAD_DOCUMENTS = [
     id: 'all-bundle',
     title: '공모전 양식 일체 압축파일 (ZIP)',
     fileType: 'ZIP',
-    size: '1.8 MB',
+    size: '35 KB',
     fileName: '2026_글로컬_부산관광_트래블톤_서식일체.zip',
     downloadPath: '/downloads/2026_글로컬_부산관광_트래블톤_서식일체.zip',
-    description: '공모요강, 팀 신청서, 기획서, 동의서 전체를 한 번에 다운로드',
+    description: '공식 참가서류(HWP) 및 공모요강(PDF) 전체를 한 번에 다운로드',
     badge: '간편 묶음',
   },
 ];

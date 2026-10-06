@@ -22,9 +22,10 @@ import {
   Sparkles,
   Info,
   ShieldCheck,
+  Download,
 } from 'lucide-react';
 import { GraduationStatus, GRADUATION_STATUS_LABELS, TeamMember } from '@/lib/types';
-import { GOOGLE_SHEET_URL, GOOGLE_DRIVE_FOLDER_URL } from '@/lib/constants';
+import { GOOGLE_SHEET_URL, GOOGLE_DRIVE_FOLDER_URL, GOOGLE_DRIVE_FORM_FILE_URL } from '@/lib/constants';
 
 interface ApplicationFormProps {
   onOpenPrivacyModal: (type: 'collection' | 'thirdParty') => void;
@@ -268,15 +269,15 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* 섹션 헤더 */}
-        <div className="text-center max-w-2xl mx-auto mb-14">
+        <div className="text-center max-w-2xl mx-auto mb-14 break-keep">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 text-xs font-bold tracking-wider uppercase mb-3 border border-cyan-500/20">
             <UploadCloud className="w-3.5 h-3.5" />
             <span>온라인 원스톱 팀 접수처</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3 break-keep">
             참가 신청 및 서류 제출
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+          <p className="text-slate-400 text-sm sm:text-base leading-relaxed break-keep">
             본 대회는 <strong className="text-cyan-300">팀 단위(2인 이상 4인 이하) 참가 필수</strong>이며, 
             개인 참가는 불가합니다. 인적사항 기재와 기획서/동의서 업로드를 완료하시면 구글 시트 및 구글 드라이브에 안전하게 자동 저장됩니다.
           </p>
@@ -286,9 +287,9 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
         <div className="p-6 sm:p-10 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-2xl backdrop-blur-xl">
           <form onSubmit={handleSubmit} className="space-y-10">
             {/* 팀 참가 필수 안내 배너 */}
-            <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 flex items-center gap-3 text-xs sm:text-sm text-cyan-200">
+            <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 flex items-center gap-3 text-xs sm:text-sm text-cyan-200 break-keep">
               <Info className="w-5 h-5 text-cyan-400 shrink-0" />
-              <span>
+              <span className="break-keep">
                 <strong>[팀 참가 안내]</strong> 대표자(팀장) 외에 <strong>최소 1명 이상의 팀원</strong>(총 2~4인)을 등록하셔야 최종 접수가 가능합니다.
               </span>
             </div>
@@ -565,18 +566,27 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
 
             {/* 4. 파일 업로드 섹션 */}
             <div className="pt-4 border-t border-slate-800">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 mb-6 gap-3 break-keep">
                 <div className="flex items-center gap-2">
                   <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
                     <UploadCloud className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white">서류 파일 업로드</h3>
-                    <p className="text-xs text-slate-400">
-                      신청서, 아이디어 계획서, 개인정보 동의서를 첨부해 주세요 (HWP, DOCX, PDF 지원).
+                    <h3 className="text-lg font-bold text-white break-keep">서류 파일 업로드</h3>
+                    <p className="text-xs text-slate-400 break-keep">
+                      신청서, 아이디어 소개서, 개인정보 동의서를 첨부해 주세요 (HWP, DOCX, PDF, ZIP 지원).
                     </p>
                   </div>
                 </div>
+
+                <a
+                  href="/downloads/참가서류_글로컬_부산관광_트래블톤.hwp"
+                  download="참가서류_글로컬_부산관광_트래블톤.hwp"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition-all self-start sm:self-auto shrink-0"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>공식 양식 다운로드 (HWP)</span>
+                </a>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -882,14 +892,14 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
               </div>
             </div>
 
-            <div>
+            <div className="break-keep">
               <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20">
                 접수 완료
               </span>
-              <h3 className="text-2xl font-black text-white mt-2">
+              <h3 className="text-2xl font-black text-white mt-2 break-keep">
                 팀 참가 신청이 성공적으로 접수되었습니다!
               </h3>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1">
+              <p className="text-xs sm:text-sm text-slate-400 mt-1 break-keep">
                 2026 글로컬 부산관광 트래블톤 공모전에 도전해 주셔서 감사합니다.
               </p>
             </div>
