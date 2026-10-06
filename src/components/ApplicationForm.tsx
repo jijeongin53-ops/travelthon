@@ -52,10 +52,9 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
     },
   ]);
 
-  // 파일 상태
-  const [applicationFile, setApplicationFile] = useState<File | null>(null);
-  const [proposalFile, setProposalFile] = useState<File | null>(null);
-  const [consentFile, setConsentFile] = useState<File | null>(null);
+  // 파일 상태 (PDF 형식 단일 통합 업로드, 최대 5개)
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
 
   // 약관 동의 상태
   const [agreePrivacy, setAgreePrivacy] = useState(false);
@@ -69,9 +68,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
   const [copied, setCopied] = useState(false);
 
   // 파일 인풋 참조
-  const appFileRef = useRef<HTMLInputElement>(null);
-  const propFileRef = useRef<HTMLInputElement>(null);
-  const conFileRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 전체 동의 핸들러
   const handleToggleAllAgreements = (checked: boolean) => {
@@ -125,6 +122,45 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
+  // 파일 추가 핸들러 (다중 파일 및 최대 5개, PDF 전용 검증)
+  const handleAddFiles = (fileList: FileList | File[]) => {
+    const incomingFiles = Array.from(fileList);
+    const validPdfFiles: File[] = [];
+    let hasNonPdf = false;
+
+    for (const file of incomingFiles) {
+      const isPdf = file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf';
+      if (isPdf) {
+        // 이미 추가된 동일 파일(이름, 크기 동일) 중복 방지
+        const isDuplicate = uploadedFiles.some((f) => f.name === file.name && f.size === file.size);
+        if (!isDuplicate) {
+          validPdfFiles.push(file);
+        }
+      } else {
+        hasNonPdf = true;
+      }
+    }
+
+    if (hasNonPdf) {
+      alert('공모전 서류 파일은 PDF(.pdf) 형식으로만 업로드 가능합니다.');
+    }
+
+    if (uploadedFiles.length + validPdfFiles.length > 5) {
+      alert('서류 파일은 한 번에 최대 5개까지만 업로드할 수 있습니다.');
+      const availableSlots = Math.max(0, 5 - uploadedFiles.length);
+      if (availableSlots > 0) {
+        setUploadedFiles((prev) => [...prev, ...validPdfFiles.slice(0, availableSlots)]);
+      }
+    } else {
+      setUploadedFiles((prev) => [...prev, ...validPdfFiles]);
+    }
+  };
+
+  // 파일 삭제 핸들러
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
   // 폼 제출 핸들러
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -173,6 +209,16 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
       }
     }
 
+    // 서류 파일 업로드 검증 (최소 1개, 최대 5개 PDF)
+    if (uploadedFiles.length === 0) {
+      setErrorMessage('공모전 참가 서류 파일(PDF)을 최소 1개 이상 업로드해 주세요 (최대 5개까지 가능).');
+      return;
+    }
+    if (uploadedFiles.length > 5) {
+      setErrorMessage('서류 파일은 최대 5개까지만 업로드할 수 있습니다.');
+      return;
+    }
+
     // 약관 동의 검증
     if (!agreePrivacy || !agreeThirdParty || !agreeNotice) {
       setErrorMessage('모든 필수 약관에 동의해 주셔야 접수가 진행됩니다.');
@@ -195,9 +241,10 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
       formData.append('agreeThirdParty', String(agreeThirdParty));
       formData.append('agreeNotice', String(agreeNotice));
 
-      if (applicationFile) formData.append('applicationFile', applicationFile);
-      if (proposalFile) formData.append('proposalFile', proposalFile);
-      if (consentFile) formData.append('consentFile', consentFile);
+      // 서류 파일 일체 전송 (PDF 최대 5개)
+      uploadedFiles.forEach((file) => {
+        formData.append('files', file);
+      });
 
       const response = await fetch('/api/submit', {
         method: 'POST',
@@ -253,9 +300,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
         graduationStatus: 'enrolled',
       },
     ]);
-    setApplicationFile(null);
-    setProposalFile(null);
-    setConsentFile(null);
+    setUploadedFiles([]);
     setAgreePrivacy(false);
     setAgreeThirdParty(false);
     setAgreeNotice(false);
@@ -572,184 +617,142 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
                     <UploadCloud className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white break-keep">서류 파일 업로드</h3>
+                    <h3 className="text-lg font-bold text-white break-keep">서류 파일 업로드 (전체 파일 업로드)</h3>
                     <p className="text-xs text-slate-400 break-keep">
-                      신청서, 아이디어 소개서, 개인정보 동의서를 첨부해 주세요 (HWP, DOCX, PDF, ZIP 지원).
+                      신청서, 아이디어 계획서, 개인정보 동의서 등 모든 제출 서류를 PDF 형식으로 업로드해 주세요. (한 번에 최대 5개)
                     </p>
                   </div>
                 </div>
 
-                <a
-                  href="/downloads/참가서류_글로컬_부산관광_트래블톤.hwp"
-                  download="참가서류_글로컬_부산관광_트래블톤.hwp"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-semibold transition-all self-start sm:self-auto shrink-0"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>공식 양식 다운로드 (HWP)</span>
-                </a>
+                <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                  <span className="text-[11px] font-semibold text-cyan-300 bg-cyan-500/10 px-2.5 py-1 rounded-lg border border-cyan-500/20">
+                    PDF 전용 (최대 5개)
+                  </span>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* 1) 신청서 업로드 */}
-                <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-slate-200">[서식 1호] 신청서</span>
-                      <span className="text-[10px] text-cyan-400 bg-cyan-500/10 px-1.5 py-0.5 rounded">필수</span>
+              {/* 숨김 파일 인풋 */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".pdf,application/pdf"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files) {
+                    handleAddFiles(e.target.files);
+                  }
+                  e.target.value = '';
+                }}
+              />
+
+              {/* 단일 통합 파일 업로드 영역 */}
+              <div className="space-y-4">
+                {/* 드래그 앤 드롭 영역 */}
+                {uploadedFiles.length < 5 && (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragging(true);
+                    }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDragging(false);
+                      if (e.dataTransfer.files) {
+                        handleAddFiles(e.dataTransfer.files);
+                      }
+                    }}
+                    className={`p-8 border-2 border-dashed rounded-2xl cursor-pointer text-center transition-all ${
+                      isDragging
+                        ? 'border-cyan-400 bg-cyan-950/40 ring-2 ring-cyan-400/30'
+                        : 'border-slate-700 hover:border-cyan-500/60 bg-slate-950/60 hover:bg-slate-900/60'
+                    }`}
+                  >
+                    <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                      <UploadCloud className="w-6 h-6" />
                     </div>
-                    <p className="text-[11px] text-slate-400 mb-4">참가신청서 양식</p>
-
-                    <input
-                      ref={appFileRef}
-                      type="file"
-                      accept=".docx,.doc,.hwp,.pdf,.zip"
-                      className="hidden"
-                      onChange={(e) => setApplicationFile(e.target.files?.[0] || null)}
-                    />
-
-                    {applicationFile ? (
-                      <div className="p-3 rounded-xl bg-slate-900 border border-cyan-500/30 mb-2">
-                        <div className="flex items-start gap-2">
-                          <FileCheck className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                          <div className="overflow-hidden">
-                            <p className="text-xs font-semibold text-white truncate">
-                              {applicationFile.name}
-                            </p>
-                            <p className="text-[10px] text-slate-400">
-                              {formatFileSize(applicationFile.size)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        onClick={() => appFileRef.current?.click()}
-                        className="p-5 border-2 border-dashed border-slate-700/80 hover:border-cyan-500/50 rounded-xl cursor-pointer text-center transition-all bg-slate-900/30 hover:bg-slate-900/60 mb-2"
-                      >
-                        <UploadCloud className="w-6 h-6 text-slate-400 mx-auto mb-1" />
-                        <span className="text-xs text-slate-300 font-medium block">파일 선택 / 드래그</span>
-                        <span className="text-[10px] text-slate-500">HWP, DOCX, PDF</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {applicationFile && (
-                    <button
-                      type="button"
-                      onClick={() => setApplicationFile(null)}
-                      className="text-[11px] text-rose-400 hover:text-rose-300 text-center py-1 hover:underline"
-                    >
-                      파일 삭제 및 재선택
-                    </button>
-                  )}
-                </div>
-
-                {/* 2) 아이디어 기획서 업로드 */}
-                <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-slate-200">[서식 2호] 아이디어 계획서</span>
-                      <span className="text-[10px] text-cyan-400 bg-cyan-500/10 px-1.5 py-0.5 rounded">필수</span>
+                    <p className="text-sm font-bold text-white mb-1">
+                      PDF 파일 선택 또는 여기에 드래그하여 업로드
+                    </p>
+                    <p className="text-xs text-slate-400 mb-2">
+                      한 번에 최대 5개의 PDF 파일을 첨부할 수 있습니다. (전체 서류 일체 첨부)
+                    </p>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-cyan-300">
+                      <span>지원 형식: .pdf</span>
+                      <span className="text-slate-600">|</span>
+                      <span>현재 {uploadedFiles.length} / 5개 등록됨</span>
                     </div>
-                    <p className="text-[11px] text-slate-400 mb-4">5매 이내 기획안</p>
-
-                    <input
-                      ref={propFileRef}
-                      type="file"
-                      accept=".docx,.doc,.hwp,.pdf,.zip"
-                      className="hidden"
-                      onChange={(e) => setProposalFile(e.target.files?.[0] || null)}
-                    />
-
-                    {proposalFile ? (
-                      <div className="p-3 rounded-xl bg-slate-900 border border-cyan-500/30 mb-2">
-                        <div className="flex items-start gap-2">
-                          <FileCheck className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                          <div className="overflow-hidden">
-                            <p className="text-xs font-semibold text-white truncate">
-                              {proposalFile.name}
-                            </p>
-                            <p className="text-[10px] text-slate-400">
-                              {formatFileSize(proposalFile.size)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        onClick={() => propFileRef.current?.click()}
-                        className="p-5 border-2 border-dashed border-slate-700/80 hover:border-cyan-500/50 rounded-xl cursor-pointer text-center transition-all bg-slate-900/30 hover:bg-slate-900/60 mb-2"
-                      >
-                        <UploadCloud className="w-6 h-6 text-slate-400 mx-auto mb-1" />
-                        <span className="text-xs text-slate-300 font-medium block">파일 선택 / 드래그</span>
-                        <span className="text-[10px] text-slate-500">HWP, DOCX, PDF</span>
-                      </div>
-                    )}
                   </div>
+                )}
 
-                  {proposalFile && (
-                    <button
-                      type="button"
-                      onClick={() => setProposalFile(null)}
-                      className="text-[11px] text-rose-400 hover:text-rose-300 text-center py-1 hover:underline"
-                    >
-                      파일 삭제 및 재선택
-                    </button>
-                  )}
-                </div>
-
-                {/* 3) 개인정보 활용 동의서 업로드 */}
-                <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-slate-200">[서식 3호] 개인정보 동의서</span>
-                      <span className="text-[10px] text-cyan-400 bg-cyan-500/10 px-1.5 py-0.5 rounded">필수</span>
+                {/* 첨부된 파일 목록 */}
+                {uploadedFiles.length > 0 && (
+                  <div className="p-4 sm:p-5 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-850">
+                      <span className="text-xs font-bold text-white flex items-center gap-2">
+                        <FileCheck className="w-4 h-4 text-cyan-400" />
+                        <span>첨부된 서류 파일 ({uploadedFiles.length} / 5개)</span>
+                      </span>
+                      {uploadedFiles.length < 5 && (
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-semibold hover:underline"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>추가 파일 첨부</span>
+                        </button>
+                      )}
                     </div>
-                    <p className="text-[11px] text-slate-400 mb-4">팀원 전원 서명본</p>
 
-                    <input
-                      ref={conFileRef}
-                      type="file"
-                      accept=".docx,.doc,.hwp,.pdf,.jpg,.jpeg,.png,.zip"
-                      className="hidden"
-                      onChange={(e) => setConsentFile(e.target.files?.[0] || null)}
-                    />
-
-                    {consentFile ? (
-                      <div className="p-3 rounded-xl bg-slate-900 border border-cyan-500/30 mb-2">
-                        <div className="flex items-start gap-2">
-                          <FileCheck className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                          <div className="overflow-hidden">
-                            <p className="text-xs font-semibold text-white truncate">
-                              {consentFile.name}
-                            </p>
-                            <p className="text-[10px] text-slate-400">
-                              {formatFileSize(consentFile.size)}
-                            </p>
+                    <div className="space-y-2">
+                      {uploadedFiles.map((file, idx) => (
+                        <div
+                          key={`${file.name}-${idx}`}
+                          className="flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 min-w-0 pr-3">
+                            <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center shrink-0 font-bold text-[10px] border border-rose-500/20">
+                              PDF
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-white truncate max-w-xs sm:max-w-md">
+                                {file.name}
+                              </p>
+                              <p className="text-[10px] text-slate-400">
+                                {formatFileSize(file.size)}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div
-                        onClick={() => conFileRef.current?.click()}
-                        className="p-5 border-2 border-dashed border-slate-700/80 hover:border-cyan-500/50 rounded-xl cursor-pointer text-center transition-all bg-slate-900/30 hover:bg-slate-900/60 mb-2"
-                      >
-                        <UploadCloud className="w-6 h-6 text-slate-400 mx-auto mb-1" />
-                        <span className="text-xs text-slate-300 font-medium block">파일 선택 / 드래그</span>
-                        <span className="text-[10px] text-slate-500">PDF, 이미지, HWP</span>
-                      </div>
-                    )}
-                  </div>
 
-                  {consentFile && (
-                    <button
-                      type="button"
-                      onClick={() => setConsentFile(null)}
-                      className="text-[11px] text-rose-400 hover:text-rose-300 text-center py-1 hover:underline"
-                    >
-                      파일 삭제 및 재선택
-                    </button>
-                  )}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFile(idx)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors shrink-0"
+                            title="파일 삭제"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 안내 문구 */}
+                <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/80 text-[11px] text-slate-400 space-y-1">
+                  <p className="flex items-start gap-1.5">
+                    <span className="text-cyan-400 font-bold">•</span>
+                    <span>
+                      참가신청서(서식1호), 아이디어 계획서(서식2호), 개인정보 수집·이용 동의서(서식3호) 등 작성하신 모든 서류를 <strong>PDF 형식</strong>으로 변환하여 업로드해 주세요.
+                    </span>
+                  </p>
+                  <p className="flex items-start gap-1.5">
+                    <span className="text-cyan-400 font-bold">•</span>
+                    <span>최대 5개 파일까지 선택 가능하며, 파일이 여러 개일 경우 드래그하여 한 번에 등록하거나 추가 첨부하실 수 있습니다.</span>
+                  </p>
                 </div>
               </div>
             </div>

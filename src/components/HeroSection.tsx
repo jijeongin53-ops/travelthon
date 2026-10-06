@@ -154,18 +154,6 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
             <Download className="w-5 h-5 text-cyan-400" />
             <span>공모요강 & 양식 서식 다운로드</span>
           </button>
-
-          {/* 3. 구글 드라이브 폴더 열기 */}
-          <a
-            href={GOOGLE_DRIVE_FOLDER_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:w-auto px-5 py-3.5 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white bg-slate-950/60 hover:bg-slate-850 border border-slate-800 rounded-xl transition-all flex items-center justify-center gap-2 group"
-          >
-            <FolderOpen className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
-            <span>공식 구글 드라이브</span>
-            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-          </a>
         </div>
 
         {/* 핵심 통계 및 특전 하단 그리드 */}

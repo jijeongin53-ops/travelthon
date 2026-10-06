@@ -45,6 +45,7 @@ export interface ApplicationFormData {
   applicationFileUrl?: string;
   proposalFileUrl?: string;
   consentFileUrl?: string;
+  uploadedFiles?: Array<{ name: string; url?: string; size?: number }>;
 }
 
 // 접수 완료 결과 인터페이스

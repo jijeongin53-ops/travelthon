@@ -10,6 +10,10 @@ export const GOOGLE_DRIVE_FORM_FILE_URL =
   'https://drive.google.com/file/d/1DNQkdGU3WRyZR6pKKlXhoQwdS_7Tdplr/view?usp=drive_link';
 export const GOOGLE_DRIVE_FORM_DOWNLOAD_URL =
   'https://drive.google.com/uc?export=download&id=1DNQkdGU3WRyZR6pKKlXhoQwdS_7Tdplr';
+// 구글 프레젠테이션 아이디어 계획서 파일 링크
+export const GOOGLE_DRIVE_PROPOSAL_PPTX_URL =
+  'https://docs.google.com/presentation/d/1kdyCfTgmWCSy3BiqLauPdB-3e04aqy6y/edit?usp=drive_link&ouid=117352543525640410176&rtpof=true&sd=true';
+
 
 
 // 대회 기본 정보
@@ -28,35 +32,35 @@ export const COMPETITION_INFO = {
 // 4대 공모 주제
 export const COMPETITION_TRACKS = [
   {
-    id: 'smart-tourism',
-    title: '스마트 & AI 부산 관광',
-    subtitle: 'Smart City & AI Experience',
-    description: 'AI, 빅데이터, IoT, AR/VR 기술을 접목한 맞춤형 여행 코스 추천 및 스마트 안내 솔루션',
-    tags: ['AI 관광 가이드', '빅데이터 분석', '교통/동선 최적화', '다국어 스마트 편의'],
+    id: 'ai-innovation',
+    title: 'AI 이노베이션',
+    subtitle: '기술혁신 DX전환',
+    description: '생성형 AI 기반 개인 맞춤형 다국어 여행비서 및 코스 추천 솔루션, 외국인 전용 간편결제·텍스리펀드·환전 핀테크 서비스, 스마트 테크 및 대중교통·짐 없는 관광 연계 시스템',
+    tags: ['생성형 AI 여행비서', '핀테크·간편결제', '스마트 테크', '짐 없는 관광 연계'],
     icon: 'Sparkles',
   },
   {
-    id: 'local-stay',
-    title: '로컬 체류형 & 워케이션',
-    subtitle: 'Local Living & Workation',
-    description: '부산의 골목길, 원도심, 어촌 마을과 연계한 중장기 체류형 웰니스·워케이션 프로그램',
-    tags: ['원도심 탐방', '해양 워케이션', '로컬 커뮤니티', '체류형 힐링 투어'],
+    id: 'local-contents',
+    title: '로컬 콘텐츠 관광',
+    subtitle: '체류확대 지역분산',
+    description: '외래객 체류일수 확대를 위한 야간관광 킬러콘텐츠, 영도·원도심·서부산 등 숨은 로컬 골목 라이프스타일 체험 상품, 부산형 글로벌 워케이션(Workation) 및 롱스테이(한달살기) 특화 상품',
+    tags: ['야간관광 킬러콘텐츠', '골목 라이프스타일', '글로벌 워케이션', '롱스테이(한달살기)'],
     icon: 'Compass',
   },
   {
-    id: 'marine-culture',
-    title: '해양 & 문화 콘텐츠 관광',
-    subtitle: 'Marine Leisure & K-Culture',
-    description: '부산 7개 해수욕장, 야간 해양 관광, K-POP 및 미식(Gourmet) 연계 글로벌 관광 콘텐츠',
-    tags: ['나이트 크루즈', '미식 투어', '해양 레포츠', '부산 축제/페스티벌'],
+    id: 'marine-leisure',
+    title: '해양 레저 콘텐츠',
+    subtitle: '체험 혁신 체류형 관광',
+    description: '사계절 운영 가능한 해양 레저 프로그램(겨울 서핑, 해변 웰니스) 개발, 초보자·외국인·가족 단위 낮은 진입장벽 체험 콘텐츠, 해양 안전 관리 및 생태계 보호, 주변 상권·숙박·맛집 연계 체류형 동선',
+    tags: ['사계절 해양 레저', '해변 웰니스/서핑', '해양 안전·생태 보호', '상권·숙박 체류 동선'],
     icon: 'Waves',
   },
   {
-    id: 'sustainable-eco',
-    title: '지속 가능한 친환경 ESG 관광',
-    subtitle: 'Eco & Regenerative Tourism',
-    description: '탄소 중립, 플라스틱 프리, 친환경 교통수단 연계 등 지역 생태계와 상생하는 에코 트래블',
-    tags: ['플로깅 트래블', '탄소저감 여행', '지역 상권 상생', '친환경 모빌리티'],
+    id: 'tourism-infra',
+    title: '관광 인프라',
+    subtitle: '인프라 고도화 접근성 강화',
+    description: '외국인 관광객의 이동 편의를 높이는 다국어 안내·교통 연계 인프라 개선안, 관광지 혼잡 완화 스마트 관제·예약 시스템, 무장애(배리어프리) 관광 환경 조성(휠체어·유아차·고령자 친화 동선), 비수기 관광 편의 인프라 확충',
+    tags: ['다국어 교통·안내', '스마트 관제·예약', '무장애(배리어프리)', '사계절 편의 인프라'],
     icon: 'Leaf',
   },
 ];

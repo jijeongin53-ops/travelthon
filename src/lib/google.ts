@@ -91,6 +91,7 @@ export async function appendRowToSheet(
     applicationFileUrl?: string;
     proposalFileUrl?: string;
     consentFileUrl?: string;
+    allFilesUrls?: string[];
   }
 ) {
   const auth = getGoogleAuthClient();
@@ -119,6 +120,11 @@ export async function appendRowToSheet(
           .join('\n')
       : '단독 참가(팀원 없음)';
 
+  // 파일 링크 포맷팅 (다중 파일 지원)
+  const file1 = fileLinks.applicationFileUrl || (fileLinks.allFilesUrls && fileLinks.allFilesUrls[0]) || '미첨부';
+  const file2 = fileLinks.proposalFileUrl || (fileLinks.allFilesUrls && fileLinks.allFilesUrls[1]) || '미첨부';
+  const file3 = fileLinks.consentFileUrl || (fileLinks.allFilesUrls && fileLinks.allFilesUrls.slice(2).join('\n')) || '미첨부';
+
   // 구글 시트에 추가할 행 데이터
   const rowValues = [
     kstTime, // A: 접수일시
@@ -133,9 +139,9 @@ export async function appendRowToSheet(
     teamMembersString, // J: 팀원 정보
     data.agreePrivacy ? '동의 (Y)' : '미동의 (N)', // K: 개인정보 수집/이용 동의
     data.agreeThirdParty ? '동의 (Y)' : '미동의 (N)', // L: 개인정보 제3자 제공 동의
-    fileLinks.applicationFileUrl || '미첨부', // M: 신청서 드라이브 링크
-    fileLinks.proposalFileUrl || '미첨부', // N: 아이디어 계획서 드라이브 링크
-    fileLinks.consentFileUrl || '미첨부', // O: 개인정보 동의서 드라이브 링크
+    file1, // M: 제출 파일 1 (신청서 등)
+    file2, // N: 제출 파일 2 (계획서 등)
+    file3, // O: 제출 파일 3 이상 (동의서 등)
     '접수 완료 (심사 대기)', // P: 접수 상태
   ];
 

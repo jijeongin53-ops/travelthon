@@ -250,36 +250,57 @@ export default function CheckApplicationModal({
 
               {/* 제출 파일 링크 */}
               <div className="pt-3 border-t border-slate-800 space-y-1.5">
-                <span className="text-xs font-semibold text-slate-400 block mb-1">제출 파일:</span>
+                <span className="text-xs font-semibold text-slate-400 block mb-1">제출 서류 파일:</span>
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs p-2 rounded-lg bg-slate-900">
-                    <span className="text-slate-300 truncate max-w-[240px]">
-                      [신청서] {result.data?.applicationFileName || '신청서.docx'}
-                    </span>
-                    <a
-                      href={result.data?.applicationFileUrl || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-cyan-400 hover:underline flex items-center gap-1 font-semibold"
-                    >
-                      <span>드라이브 열기</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                  <div className="flex items-center justify-between text-xs p-2 rounded-lg bg-slate-900">
-                    <span className="text-slate-300 truncate max-w-[240px]">
-                      [기획서] {result.data?.proposalFileName || '아이디어계획서.docx'}
-                    </span>
-                    <a
-                      href={result.data?.proposalFileUrl || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-cyan-400 hover:underline flex items-center gap-1 font-semibold"
-                    >
-                      <span>드라이브 열기</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
+                  {result.data?.uploadedFiles && result.data.uploadedFiles.length > 0 ? (
+                    result.data.uploadedFiles.map((file: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between text-xs p-2 rounded-lg bg-slate-900">
+                        <span className="text-slate-300 truncate max-w-[240px]">
+                          [서류 {idx + 1}] {file.name}
+                        </span>
+                        <a
+                          href={file.url || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-cyan-400 hover:underline flex items-center gap-1 font-semibold"
+                        >
+                          <span>드라이브 열기</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between text-xs p-2 rounded-lg bg-slate-900">
+                        <span className="text-slate-300 truncate max-w-[240px]">
+                          [신청서] {result.data?.applicationFileName || '신청서.docx'}
+                        </span>
+                        <a
+                          href={result.data?.applicationFileUrl || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-cyan-400 hover:underline flex items-center gap-1 font-semibold"
+                        >
+                          <span>드라이브 열기</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                      <div className="flex items-center justify-between text-xs p-2 rounded-lg bg-slate-900">
+                        <span className="text-slate-300 truncate max-w-[240px]">
+                          [기획서] {result.data?.proposalFileName || '아이디어계획서.docx'}
+                        </span>
+                        <a
+                          href={result.data?.proposalFileUrl || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-cyan-400 hover:underline flex items-center gap-1 font-semibold"
+                        >
+                          <span>드라이브 열기</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

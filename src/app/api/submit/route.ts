@@ -73,11 +73,44 @@ export async function POST(request: NextRequest) {
     const dateCode = Date.now().toString(36).toUpperCase().slice(-4);
     const registrationNumber = `BT26-${dateCode}-${randomSuffix}`;
 
-    // 첨부 파일 객체 가져오기
-    const applicationFile = formData.get('applicationFile') as File | null;
-    const proposalFile = formData.get('proposalFile') as File | null;
-    const consentFile = formData.get('consentFile') as File | null;
+    // 첨부 파일 객체 가져오기 (단일 통합 업로드 및 다중 파일 지원: 최대 5개 PDF)
+    const rawFiles = formData.getAll('files') as File[];
+    const legacyAppFile = formData.get('applicationFile') as File | null;
+    const legacyPropFile = formData.get('proposalFile') as File | null;
+    const legacyConFile = formData.get('consentFile') as File | null;
 
+    let allFiles: File[] = [];
+    if (rawFiles && rawFiles.length > 0) {
+      allFiles = rawFiles.filter((f) => f && f.size > 0);
+    } else {
+      if (legacyAppFile && legacyAppFile.size > 0) allFiles.push(legacyAppFile);
+      if (legacyPropFile && legacyPropFile.size > 0) allFiles.push(legacyPropFile);
+      if (legacyConFile && legacyConFile.size > 0) allFiles.push(legacyConFile);
+    }
+
+    // 파일 개수 제한 (최대 5개)
+    if (allFiles.length > 5) {
+      return NextResponse.json(
+        { success: false, message: '서류 파일은 한 번에 최대 5개까지만 업로드할 수 있습니다.' },
+        { status: 400 }
+      );
+    }
+
+    // 파일 형식 검증 (PDF 파일 필수)
+    for (const file of allFiles) {
+      const isPdf = file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf';
+      if (!isPdf) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `제출 파일(${file.name})의 형식이 올바르지 않습니다. 모든 서류 파일은 PDF(.pdf) 형식으로만 업로드 가능합니다.`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    let uploadedFileUrls: string[] = [];
     let applicationFileUrl = '';
     let proposalFileUrl = '';
     let consentFileUrl = '';
@@ -108,42 +141,28 @@ export async function POST(request: NextRequest) {
 
     if (hasServiceAccount) {
       try {
-        // 구글 드라이브 파일 업로드
-        if (applicationFile && applicationFile.size > 0) {
-          const buffer = Buffer.from(await applicationFile.arrayBuffer());
+        // 구글 드라이브 파일 업로드 (다중 파일 순회)
+        for (let i = 0; i < allFiles.length; i++) {
+          const file = allFiles[i];
+          const buffer = Buffer.from(await file.arrayBuffer());
           const uploadRes = await uploadFileToDrive(
             buffer,
-            `[신청서]_${teamName}_${name}_${applicationFile.name}`,
-            applicationFile.type || 'application/octet-stream'
+            `[트래블톤서류${i + 1}]_${teamName}_${name}_${file.name}`,
+            file.type || 'application/pdf'
           );
-          applicationFileUrl = uploadRes.webViewLink;
+          uploadedFileUrls.push(uploadRes.webViewLink);
         }
 
-        if (proposalFile && proposalFile.size > 0) {
-          const buffer = Buffer.from(await proposalFile.arrayBuffer());
-          const uploadRes = await uploadFileToDrive(
-            buffer,
-            `[기획서]_${teamName}_${name}_${proposalFile.name}`,
-            proposalFile.type || 'application/octet-stream'
-          );
-          proposalFileUrl = uploadRes.webViewLink;
-        }
-
-        if (consentFile && consentFile.size > 0) {
-          const buffer = Buffer.from(await consentFile.arrayBuffer());
-          const uploadRes = await uploadFileToDrive(
-            buffer,
-            `[동의서]_${teamName}_${name}_${consentFile.name}`,
-            consentFile.type || 'application/octet-stream'
-          );
-          consentFileUrl = uploadRes.webViewLink;
-        }
+        applicationFileUrl = uploadedFileUrls[0] || '';
+        proposalFileUrl = uploadedFileUrls[1] || '';
+        consentFileUrl = uploadedFileUrls[2] || '';
 
         // 구글 시트에 행 추가
         await appendRowToSheet(registrationNumber, appData, {
           applicationFileUrl,
           proposalFileUrl,
           consentFileUrl,
+          allFilesUrls: uploadedFileUrls,
         });
 
         storageMode = 'google-cloud';
@@ -156,27 +175,12 @@ export async function POST(request: NextRequest) {
       try {
         // Apps Script로 전달할 파일 base64 변환
         const filesPayload: any = {};
-        if (applicationFile && applicationFile.size > 0) {
-          const buffer = Buffer.from(await applicationFile.arrayBuffer());
-          filesPayload.applicationFile = {
-            name: applicationFile.name,
-            type: applicationFile.type,
-            base64: buffer.toString('base64'),
-          };
-        }
-        if (proposalFile && proposalFile.size > 0) {
-          const buffer = Buffer.from(await proposalFile.arrayBuffer());
-          filesPayload.proposalFile = {
-            name: proposalFile.name,
-            type: proposalFile.type,
-            base64: buffer.toString('base64'),
-          };
-        }
-        if (consentFile && consentFile.size > 0) {
-          const buffer = Buffer.from(await consentFile.arrayBuffer());
-          filesPayload.consentFile = {
-            name: consentFile.name,
-            type: consentFile.type,
+        for (let i = 0; i < allFiles.length; i++) {
+          const file = allFiles[i];
+          const buffer = Buffer.from(await file.arrayBuffer());
+          filesPayload[`file_${i + 1}`] = {
+            name: file.name,
+            type: file.type || 'application/pdf',
             base64: buffer.toString('base64'),
           };
         }
@@ -193,18 +197,28 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 업로드된 파일 상세 정보 생성
+    const uploadedFilesSummary = allFiles.map((file, idx) => ({
+      name: file.name,
+      size: file.size,
+      url:
+        uploadedFileUrls[idx] ||
+        'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId',
+    }));
+
     // 메모리 캐시에 저장 (즉시 접수 확인 가능하도록)
     const submissionRecord = {
       registrationNumber,
       createdAt: new Date().toISOString(),
       data: {
         ...appData,
-        applicationFileName: applicationFile?.name || '신청서_제출됨.docx',
-        proposalFileName: proposalFile?.name || '아이디어기획서_제출됨.docx',
-        consentFileName: consentFile?.name || '개인정보동의서_제출됨.pdf',
+        applicationFileName: allFiles[0]?.name || '신청서_제출됨.pdf',
+        proposalFileName: allFiles[1]?.name || '아이디어기획서_제출됨.pdf',
+        consentFileName: allFiles[2]?.name || '개인정보동의서_제출됨.pdf',
         applicationFileUrl: applicationFileUrl || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId',
         proposalFileUrl: proposalFileUrl || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId',
         consentFileUrl: consentFileUrl || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId',
+        uploadedFiles: uploadedFilesSummary,
       },
       status: '접수 완료',
       storageMode,
