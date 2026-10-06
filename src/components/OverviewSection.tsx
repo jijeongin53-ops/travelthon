@@ -73,7 +73,7 @@ export default function OverviewSection() {
             </div>
             <h3 className="text-lg font-bold text-white mb-2 break-keep">상금 + 후속 사업화 지원</h3>
             <p className="text-sm text-slate-400 leading-relaxed break-keep">
-              총 상금 300만원과 더불어 부산관광공사 상품화 실증비 지원, 부산관광기업지원센터 입주 우선권 등의 특전이 제공됩니다.
+              총 상금 300만원과 더불어 2027년 부산관광스타트업 1차 서류 면제, 창업 멘토링 지원 등의 특전이 제공됩니다.
             </p>
           </div>
         </div>

@@ -185,16 +185,26 @@ export async function POST(request: NextRequest) {
           };
         }
 
-        await sendViaAppsScript({
+        const scriptRes = await sendViaAppsScript({
           registrationNumber,
           data: appData,
           files: filesPayload,
         });
+        if (scriptRes && Array.isArray(scriptRes.uploadedFileUrls) && scriptRes.uploadedFileUrls.length > 0) {
+          uploadedFileUrls = scriptRes.uploadedFileUrls;
+          applicationFileUrl = uploadedFileUrls[0] || '';
+          proposalFileUrl = uploadedFileUrls[1] || '';
+          consentFileUrl = uploadedFileUrls[2] || '';
+        }
         storageMode = 'apps-script';
       } catch (scriptError) {
         console.error('Apps Script 연동 실패:', scriptError);
         storageMode = 'fallback';
       }
+    } else {
+      console.warn(
+        '[구글 연동 안내] GOOGLE_APPS_SCRIPT_URL 또는 GOOGLE_SERVICE_ACCOUNT 환경변수가 등록되지 않아 구글 시트/드라이브에 즉시 저장되지 않았습니다. Apps Script Web App URL을 설정해 주세요.'
+      );
     }
 
     // 업로드된 파일 상세 정보 생성

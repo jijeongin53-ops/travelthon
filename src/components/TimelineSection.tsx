@@ -31,8 +31,8 @@ export default function TimelineSection() {
           </p>
         </div>
 
-        {/* 시상 내역 카드 그리드 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-24 break-keep">
+        {/* 시상 내역 카드 그리드 (대상, 우수상 2개 부문) */}
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-24 break-keep">
           {PRIZE_LIST.map((prize, idx) => {
             const isGrand = idx === 0;
             return (
