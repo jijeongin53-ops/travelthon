@@ -75,15 +75,15 @@ export default function FaqSection() {
           </div>
 
           <div className="flex items-center gap-4 text-xs font-semibold text-slate-300">
-            <div className="flex items-center gap-1.5">
+            <a href="tel:010-8203-0046" className="flex items-center gap-1.5 hover:text-cyan-300 transition-colors">
               <PhoneCall className="w-4 h-4 text-cyan-400" />
-              <span>051-740-0000</span>
-            </div>
+              <span>010-8203-0046</span>
+            </a>
             <span className="text-slate-700">|</span>
-            <div className="flex items-center gap-1.5">
+            <a href="mailto:tourbiz.bto@gmail.com" className="flex items-center gap-1.5 hover:text-cyan-300 transition-colors">
               <Mail className="w-4 h-4 text-cyan-400" />
-              <span>contact@busan-travelthon.kr</span>
-            </div>
+              <span>tourbiz.bto@gmail.com</span>
+            </a>
           </div>
         </div>
       </div>
