@@ -61,9 +61,9 @@ export default function OverviewSection() {
             <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Sparkles className="w-6 h-6 text-blue-400" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-2 break-keep">전문가 1:1 멘토링 데이</h3>
+            <h3 className="text-lg font-bold text-white mb-2 break-keep">온라인 사전 오리엔테이션</h3>
             <p className="text-sm text-slate-400 leading-relaxed break-keep">
-              관광 스타트업 대표, ICT 개발자, 마케팅 전문가가 직접 참여하여 아이디어의 시장성 및 기술적 완성도를 빌드업해 드립니다.
+              본선 진출팀을 대상으로 온라인 사전 오리엔테이션을 진행하여 대회 세부 운영 규칙과 핵심 가이드를 상세히 안내해 드립니다.
             </p>
           </div>
 

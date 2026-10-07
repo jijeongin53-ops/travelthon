@@ -164,7 +164,7 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
               <span className="text-xs font-semibold">총 상금 규모</span>
             </div>
             <div className="text-lg sm:text-xl font-black text-white">300만원</div>
-            <p className="text-[11px] text-slate-400 break-keep">대상 1팀 150만원 (부산시장상)</p>
+            <p className="text-[11px] text-slate-400 break-keep">대상 1팀 200만원 (부산시장상)</p>
           </div>
 
           <div className="bg-slate-900/50 backdrop-blur-md rounded-xl p-4 border border-slate-800/60 text-left">
@@ -172,8 +172,8 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
               <Calendar className="w-4 h-4" />
               <span className="text-xs font-semibold">본선 트래블톤</span>
             </div>
-            <div className="text-lg sm:text-xl font-black text-white">2일간</div>
-            <p className="text-[11px] text-slate-400 break-keep">부산 벡스코 & 로컬 거점 연계</p>
+            <div className="text-lg sm:text-xl font-black text-white">11.14 ~ 11.15</div>
+            <p className="text-[11px] text-slate-400 break-keep">부산 벡스코 (2일간 집중 기획)</p>
           </div>
 
           <div className="bg-slate-900/50 backdrop-blur-md rounded-xl p-4 border border-slate-800/60 text-left">
@@ -182,7 +182,7 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
               <span className="text-xs font-semibold">참가 자격</span>
             </div>
             <div className="text-lg sm:text-xl font-black text-white">팀 참가 필수</div>
-            <p className="text-[11px] text-slate-400 break-keep">2~4인 팀 구성 (개인 참가 불가)</p>
+            <p className="text-[11px] text-slate-400 break-keep">2인 이상 팀 구성 (개인 참가 불가)</p>
           </div>
 
           <div className="bg-slate-900/50 backdrop-blur-md rounded-xl p-4 border border-slate-800/60 text-left">
@@ -190,8 +190,8 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
               <ShieldCheck className="w-4 h-4" />
               <span className="text-xs font-semibold">사후 지원</span>
             </div>
-            <div className="text-lg sm:text-xl font-black text-white">입주 & 멘토링</div>
-            <p className="text-[11px] text-slate-400 break-keep">부산관광기업지원센터 입주 우대</p>
+            <div className="text-lg sm:text-xl font-black text-white">서류면제 & 멘토링</div>
+            <p className="text-[11px] text-slate-400 break-keep">2027 관광스타트업 1차 서류 면제</p>
           </div>
         </div>
 
