@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Compass, ExternalLink, ArrowUp, FolderOpen, FileSpreadsheet } from 'lucide-react';
-import { GOOGLE_DRIVE_FOLDER_URL, GOOGLE_SHEET_URL } from '@/lib/constants';
+import { Compass, ArrowUp } from 'lucide-react';
 
 interface FooterProps {
   onScrollToTop: () => void;
@@ -30,34 +29,12 @@ export default function Footer({ onScrollToTop }: FooterProps) {
             </p>
           </div>
 
-          {/* 공식 구글 클라우드 링크들 */}
-          <div className="flex flex-wrap items-center gap-3">
-            <a
-              href={GOOGLE_SHEET_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-emerald-400 hover:text-emerald-300 border border-slate-800 hover:border-emerald-500/40 transition-all flex items-center gap-2 font-medium"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-              <span>공식 Google 시트 DB</span>
-              <ExternalLink className="w-3 h-3 text-slate-500" />
-            </a>
-
-            <a
-              href={GOOGLE_DRIVE_FOLDER_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-400 hover:text-cyan-300 border border-slate-800 hover:border-cyan-500/40 transition-all flex items-center gap-2 font-medium"
-            >
-              <FolderOpen className="w-4 h-4 text-cyan-400" />
-              <span>공식 Google 드라이브</span>
-              <ExternalLink className="w-3 h-3 text-slate-500" />
-            </a>
-
+          {/* 맨 위로 스크롤 버튼 */}
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onScrollToTop}
-              className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition-all"
+              className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition-all cursor-pointer"
               aria-label="맨 위로 스크롤"
             >
               <ArrowUp className="w-4 h-4" />
@@ -75,7 +52,7 @@ export default function Footer({ onScrollToTop }: FooterProps) {
 
           <div className="text-left md:text-right">
             <p>© 2026 Glocal Busan Travelthon. All rights reserved.</p>
-            <p className="text-slate-600 mt-0.5">Powered by Next.js & Google Cloud Integration</p>
+            <p className="text-slate-600 mt-0.5">Powered by Next.js</p>
           </div>
         </div>
       </div>
