@@ -173,7 +173,7 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
               <span className="text-xs font-semibold">본선 트래블톤</span>
             </div>
             <div className="text-lg sm:text-xl font-black text-white">11.14 ~ 11.15</div>
-            <p className="text-[11px] text-slate-400 break-keep">부산 벡스코 (2일간 집중 기획)</p>
+            <p className="text-[11px] text-slate-400 break-keep">부산관광기업지원센터 (2일간 집중 기획)</p>
           </div>
 
           <div className="bg-slate-900/50 backdrop-blur-md rounded-xl p-4 border border-slate-800/60 text-left">

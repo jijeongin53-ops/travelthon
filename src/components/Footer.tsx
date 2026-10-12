@@ -69,7 +69,7 @@ export default function Footer({ onScrollToTop }: FooterProps) {
         <div className="pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-slate-500 text-[11px] break-keep">
           <div className="space-y-1 break-keep">
             <p>주최 : 부산광역시 | 주관 : 부산관광공사, 글로컬 트래블톤 조직위원회</p>
-            <p>운영사무국 : 부산광역시 해운대구 APEC로 55, 벡스코 제2전시장 컨벤션센터</p>
+            <p>운영사무국 : 부산광역시 영도구 봉래나루로 33, 부산관광기업지원센터</p>
             <p>문의전화 : 010-8203-0046 | 이메일 : tourbiz.bto@gmail.com</p>
           </div>
 

@@ -24,7 +24,7 @@ export const COMPETITION_INFO = {
   targetDate: '2026-10-30T23:59:59+09:00', // 접수 마감일: 2026년 10월 30일
   targetDateDisplay: '2026년 10월 30일(금) 24:00까지',
   eventDate: '2026년 11월 14일(토) ~ 11월 15일(일) [2일간]',
-  venue: '부산 벡스코(BEXCO) 제2전시장 & 부산 전역 로컬 거점',
+  venue: '부산관광기업지원센터 & 부산 전역 로컬 거점',
   totalPrize: '총 상금 300만원',
   participants: '전국 대학생, 청년, 관광 스타트업 및 일반인 (2인 이상 팀 참가 필수 / 개인 참가 불가)',
 };
@@ -112,7 +112,7 @@ export const SCHEDULE_STEPS = [
     step: '04',
     phase: '2일간의 트래블톤 본선',
     date: '2026. 11. 14 ~ 11. 15',
-    description: '부산 벡스코에서 펼쳐지는 2일간의 집중 릴레이 기획 & 프로토타입 제작',
+    description: '부산관광기업지원센터에서 펼쳐지는 2일간의 집중 릴레이 기획 & 프로토타입 제작',
     status: 'upcoming',
   },
   {
