@@ -1,19 +1,22 @@
 /**
  * 2026 글로컬 부산관광 트래블톤 공모전
- * Google Apps Script Web App 연동 스크립트 (최대 5개 PDF 및 구글 시트 자동 저장)
+ * Google Apps Script Web App 연동 스크립트 (최대 5개 PDF 및 구글 시트 자동 저장 + 이메일 알림)
  * 
- * [설치 및 헤더 자동 생성 방법]
+ * [설치 및 이메일 권한 승인 / 배포 방법]
  * 1. 구글 시트 (https://docs.google.com/spreadsheets/d/1n3zQcOOFtX8Bfr0XXZH9X4DDe_Be3JdzgGCWlCbfH4I/edit) 열기
  * 2. 상단 메뉴 [확장 프로그램] > [Apps Script] 클릭
- * 3. 기존 코드를 모두 지우고 이 파일의 내용을 붙여넣기 후 [저장(Ctrl+S)]
- * 4. 상단 함수 선택 드롭다운에서 [setupSheetHeader] 선택 후 ▶ [실행] 클릭!
- *    -> 구글 시트에 1행 헤더 항목이 자동으로 예쁘게 생성됩니다! (최초 권한 승인 창 뜨면 허용 클릭)
- * 5. 상단 우측 파란색 [배포] 버튼 > [새 배포] 클릭
- *    - 톱니바퀴 아이콘 클릭하여 유형: [웹 앱] 선택
- *    - 설명: 트래블톤 접수 웹앱
- *    - 다음 사용자 권한으로 실행: '나(내 계정)'
- *    - 액세스 권한이 있는 사용자: '모든 사용자(Anyone)' 선택 (매우 중요!)
- * 6. [배포] 버튼 클릭 후 표시되는 웹 앱 URL (예: https://script.google.com/macros/s/.../exec) 복사!
+ * 3. 기존 코드를 모두 지우고 이 파일(Code.gs)의 전체 내용을 붙여넣기 후 [저장(Ctrl+S)]
+ * 
+ * 4. ★ 이메일 전송 권한 승인 (필수!):
+ *    - 상단 함수 선택 드롭다운에서 [testSendEmail] 선택 후 ▶ [실행] 클릭!
+ *    - "권한 검토" 팝업이 뜨면 [내 구글 계정 선택] > [고급] > [안전하지 않은 페이지로 이동] > [허용] 클릭!
+ *    - 허용 즉시 jijeongin53@gmail.com 으로 테스트 메일이 도착합니다.
+ * 
+ * 5. ★ 웹앱 새 버전으로 배포 (필수!):
+ *    - 상단 우측 파란색 [배포] 버튼 > [배포 관리] 클릭
+ *    - 현재 배포 항목 우측의 연필(수정) 아이콘 클릭
+ *    - 버전 드롭다운에서 반드시 [새 버전] 선택!
+ *    - 하단 [배포] 버튼 클릭!
  */
 
 var DRIVE_FOLDER_ID = "1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId"; // 구글 드라이브 폴더 ID
@@ -61,6 +64,22 @@ function setupSheetHeader() {
   }
   
   Logger.log("✅ 시트 헤더가 성공적으로 생성되었습니다!");
+}
+
+// 📧 이메일 발송 권한 승인 및 단독 테스트 함수 (상단에서 'testSendEmail' 선택 후 [▶ 실행] 클릭!)
+function testSendEmail() {
+  var testEmail = DEFAULT_ADMIN_EMAIL;
+  var subject = "[테스트] 2026 트래블톤 이메일 알림 연동 테스트";
+  var body = "안녕하세요!\n이 메일이 도착했다면 2026 글로컬 부산관광 트래블톤 접수 알림 연동이 성공적으로 완료된 것입니다.\n\n수신자: " + testEmail;
+  
+  try {
+    GmailApp.sendEmail(testEmail, subject, body);
+    Logger.log("✅ GmailApp으로 테스트 메일 발송 성공: " + testEmail);
+  } catch (e1) {
+    Logger.log("GmailApp 실패, MailApp 시도: " + e1.toString());
+    MailApp.sendEmail(testEmail, subject, body);
+    Logger.log("✅ MailApp으로 테스트 메일 발송 성공: " + testEmail);
+  }
 }
 
 function doPost(e) {
@@ -230,21 +249,41 @@ function doPost(e) {
         '  </div>' +
         '</div>';
 
-      MailApp.sendEmail({
-        to: recipient,
-        subject: emailSubject,
-        body: textBody,
-        htmlBody: htmlBody
-      });
-      Logger.log("✅ 관리자 이메일 알림 발송 성공: " + recipient);
+      var mailSent = false;
+      var mailErrorDetail = "";
+      
+      try {
+        GmailApp.sendEmail(recipient, emailSubject, textBody, {
+          htmlBody: htmlBody
+        });
+        mailSent = true;
+        Logger.log("✅ GmailApp 관리자 이메일 알림 발송 성공: " + recipient);
+      } catch (err1) {
+        Logger.log("GmailApp 실패, MailApp 시도: " + err1.toString());
+        try {
+          MailApp.sendEmail({
+            to: recipient,
+            subject: emailSubject,
+            body: textBody,
+            htmlBody: htmlBody
+          });
+          mailSent = true;
+          Logger.log("✅ MailApp 관리자 이메일 알림 발송 성공: " + recipient);
+        } catch (err2) {
+          mailErrorDetail = "GmailApp: " + err1.toString() + " | MailApp: " + err2.toString();
+          Logger.log("⚠️ 이메일 알림 발송 실패: " + mailErrorDetail);
+        }
+      }
     } catch (mailError) {
-      Logger.log("⚠️ 이메일 알림 발송 오류(접수는 정상 완료): " + mailError.toString());
+      Logger.log("⚠️ 이메일 처리 중 예외 발생: " + mailError.toString());
     }
     
     return ContentService.createTextOutput(JSON.stringify({
       success: true,
       registrationNumber: regNo,
-      uploadedFileUrls: uploadedFileUrls
+      uploadedFileUrls: uploadedFileUrls,
+      mailSent: mailSent,
+      mailErrorDetail: mailErrorDetail || undefined
     })).setMimeType(ContentService.MimeType.JSON);
     
   } catch (error) {
