@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadFileToDrive, appendRowToSheet, sendViaAppsScript } from '@/lib/google';
 import { ApplicationFormData, GraduationStatus } from '@/lib/types';
+import { ADMIN_NOTIFICATION_EMAIL } from '@/lib/constants';
 
 // 접수 메모리 저장소 (서버 세션 동안 접수 조회용 데모 캐시)
 export const globalSubmissionsCache: Map<string, any> = (globalThis as any).__submissionsCache || new Map();
@@ -166,6 +167,20 @@ export async function POST(request: NextRequest) {
         });
 
         storageMode = 'google-cloud';
+
+        // 서비스 계정 저장 성공 후에도 Apps Script를 통한 관리자 이메일 알림 발송 시도
+        if (hasAppsScript) {
+          try {
+            await sendViaAppsScript({
+              registrationNumber,
+              data: appData,
+              files: {},
+              notificationEmail: ADMIN_NOTIFICATION_EMAIL,
+            });
+          } catch (notifyErr) {
+            console.warn('관리자 이메일 알림 웹훅 전송 경고:', notifyErr);
+          }
+        }
       } catch (googleError: any) {
         console.error('Google API 연동 에러:', googleError);
         // 에러가 나더라도 사용자 경험을 위해 백업 캐시에 저장
@@ -189,6 +204,7 @@ export async function POST(request: NextRequest) {
           registrationNumber,
           data: appData,
           files: filesPayload,
+          notificationEmail: ADMIN_NOTIFICATION_EMAIL,
         });
         if (scriptRes && Array.isArray(scriptRes.uploadedFileUrls) && scriptRes.uploadedFileUrls.length > 0) {
           uploadedFileUrls = scriptRes.uploadedFileUrls;

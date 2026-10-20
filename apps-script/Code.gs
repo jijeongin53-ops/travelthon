@@ -17,6 +17,7 @@
  */
 
 var DRIVE_FOLDER_ID = "1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId"; // 구글 드라이브 폴더 ID
+var DEFAULT_ADMIN_EMAIL = "jijeongin53@gmail.com"; // 참가 신청 완료 시 알림을 받을 관리자 이메일
 
 // 시트 헤더 자동 세팅 함수 (Apps Script에서 'setupSheetHeader' 선택 후 실행 클릭)
 function setupSheetHeader() {
@@ -161,6 +162,84 @@ function doPost(e) {
     ];
     
     sheet.appendRow(row);
+    
+    // 참가 신청 완료 시 관리자(jijeongin53@gmail.com)에게 즉시 이메일 알림 발송
+    try {
+      var recipient = payload.notificationEmail || DEFAULT_ADMIN_EMAIL;
+      var teamTitle = data.teamName || "개인";
+      var emailSubject = "[2026 트래블톤 참가 접수 알림] " + teamTitle + " (" + data.name + " 대표)";
+      
+      var textBody = 
+        "📢 [2026 글로컬 부산관광 트래블톤 공모전] 신규 참가 신청이 접수되었습니다!\n\n" +
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+        "1. 접수 기본 정보\n" +
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+        "• 접수 번호 : " + regNo + "\n" +
+        "• 접수 일시 : " + kstNow + "\n" +
+        "• 팀    명 : " + teamTitle + "\n" +
+        "• 대 표 자 : " + data.name + " (" + data.birthDate + ")\n" +
+        "• 소속/대학: " + data.university + " (" + (gradLabels[data.graduationStatus] || data.graduationStatus) + ")\n" +
+        "• 연 락 처 : " + data.phone + "\n" +
+        "• 이 메 일 : " + data.email + "\n\n" +
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+        "2. 팀원 명단\n" +
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+        teamMembersString + "\n\n" +
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+        "3. 제출 서류 파일\n" +
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+        (uploadedFileUrls.length > 0 ? uploadedFileUrls.join("\n") : "업로드된 파일 없음") + "\n\n" +
+        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+        "📊 구글 스프레드시트 바로가기:\n" +
+        "https://docs.google.com/spreadsheets/d/1n3zQcOOFtX8Bfr0XXZH9X4DDe_Be3JdzgGCWlCbfH4I/edit\n\n" +
+        "📁 구글 드라이브 폴더 바로가기:\n" +
+        "https://drive.google.com/drive/folders/" + DRIVE_FOLDER_ID;
+
+      var htmlFilesList = "";
+      if (uploadedFileUrls.length > 0) {
+        for (var u = 0; u < uploadedFileUrls.length; u++) {
+          htmlFilesList += '<li><a href="' + uploadedFileUrls[u] + '" target="_blank" style="color: #0284c7; text-decoration: underline;">제출 서류 ' + (u + 1) + ' 열기 (구글 드라이브)</a></li>';
+        }
+      } else {
+        htmlFilesList = "<li>업로드된 파일 없음</li>";
+      }
+
+      var htmlBody = 
+        '<div style="font-family: \'Apple SD Gothic Neo\', \'Malgun Gothic\', sans-serif; max-width: 640px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">' +
+        '  <div style="background: linear-gradient(135deg, #0f172a, #0369a1); padding: 20px; border-radius: 8px; color: #ffffff; text-align: center; margin-bottom: 24px;">' +
+        '    <h2 style="margin: 0 0 6px 0; font-size: 20px; font-weight: bold; color: #38bdf8;">2026 글로컬 부산관광 트래블톤</h2>' +
+        '    <p style="margin: 0; font-size: 14px; color: #e2e8f0;">새로운 참가 신청서가 접수되었습니다.</p>' +
+        '  </div>' +
+        '  <h3 style="font-size: 16px; color: #0f172a; border-left: 4px solid #0284c7; padding-left: 8px; margin: 18px 0 10px 0;">1. 접수 정보</h3>' +
+        '  <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px;">' +
+        '    <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px; width: 28%; font-weight: bold; color: #475569; background: #f8fafc;">접수번호</td><td style="padding: 8px; font-weight: bold; color: #0284c7;">' + regNo + '</td></tr>' +
+        '    <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px; font-weight: bold; color: #475569; background: #f8fafc;">접수일시</td><td style="padding: 8px; color: #1e293b;">' + kstNow + '</td></tr>' +
+        '    <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px; font-weight: bold; color: #475569; background: #f8fafc;">팀명</td><td style="padding: 8px; font-weight: bold; color: #1e293b;">' + teamTitle + '</td></tr>' +
+        '    <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px; font-weight: bold; color: #475569; background: #f8fafc;">대표자명</td><td style="padding: 8px; color: #1e293b;">' + data.name + ' (' + data.birthDate + ')</td></tr>' +
+        '    <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px; font-weight: bold; color: #475569; background: #f8fafc;">소속 / 대학</td><td style="padding: 8px; color: #1e293b;">' + data.university + ' (' + (gradLabels[data.graduationStatus] || data.graduationStatus) + ')</td></tr>' +
+        '    <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px; font-weight: bold; color: #475569; background: #f8fafc;">연락처</td><td style="padding: 8px; color: #1e293b;"><a href="tel:' + data.phone + '" style="color: #0284c7;">' + data.phone + '</a></td></tr>' +
+        '    <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px; font-weight: bold; color: #475569; background: #f8fafc;">이메일</td><td style="padding: 8px; color: #1e293b;"><a href="mailto:' + data.email + '" style="color: #0284c7;">' + data.email + '</a></td></tr>' +
+        '  </table>' +
+        '  <h3 style="font-size: 16px; color: #0f172a; border-left: 4px solid #0284c7; padding-left: 8px; margin: 18px 0 10px 0;">2. 팀원 명단</h3>' +
+        '  <div style="background: #f8fafc; padding: 12px; border-radius: 6px; font-size: 13px; line-height: 1.6; color: #334155; white-space: pre-wrap; margin-bottom: 20px;">' + teamMembersString + '</div>' +
+        '  <h3 style="font-size: 16px; color: #0f172a; border-left: 4px solid #0284c7; padding-left: 8px; margin: 18px 0 10px 0;">3. 제출 서류 파일</h3>' +
+        '  <ul style="font-size: 13px; line-height: 1.8; color: #334155; margin-bottom: 24px; padding-left: 20px;">' + htmlFilesList + '</ul>' +
+        '  <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0;">' +
+        '    <a href="https://docs.google.com/spreadsheets/d/1n3zQcOOFtX8Bfr0XXZH9X4DDe_Be3JdzgGCWlCbfH4I/edit" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #0284c7; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 0 4px;">구글 시트 확인하기</a>' +
+        '    <a href="https://drive.google.com/drive/folders/' + DRIVE_FOLDER_ID + '" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #0f172a; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; margin: 0 4px;">구글 드라이브 확인하기</a>' +
+        '  </div>' +
+        '</div>';
+
+      MailApp.sendEmail({
+        to: recipient,
+        subject: emailSubject,
+        body: textBody,
+        htmlBody: htmlBody
+      });
+      Logger.log("✅ 관리자 이메일 알림 발송 성공: " + recipient);
+    } catch (mailError) {
+      Logger.log("⚠️ 이메일 알림 발송 오류(접수는 정상 완료): " + mailError.toString());
+    }
     
     return ContentService.createTextOutput(JSON.stringify({
       success: true,

@@ -166,7 +166,9 @@ export async function sendViaAppsScript(payload: {
     applicationFile?: { name: string; type: string; base64: string };
     proposalFile?: { name: string; type: string; base64: string };
     consentFile?: { name: string; type: string; base64: string };
+    [key: string]: any;
   };
+  notificationEmail?: string;
 }) {
   if (!GOOGLE_APPS_SCRIPT_URL) {
     throw new Error('Google Apps Script URL이 설정되지 않았습니다.');

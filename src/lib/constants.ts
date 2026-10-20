@@ -1,5 +1,9 @@
 // 2026 글로컬 부산관광 트래블톤 공모전 기본 상수 및 텍스트 데이터
 
+// 관리자 알림 수신 이메일
+export const ADMIN_NOTIFICATION_EMAIL =
+  process.env.ADMIN_NOTIFICATION_EMAIL || 'jijeongin53@gmail.com';
+
 // 구글 시트 및 드라이브 링크
 export const GOOGLE_SHEET_URL =
   'https://docs.google.com/spreadsheets/d/1n3zQcOOFtX8Bfr0XXZH9X4DDe_Be3JdzgGCWlCbfH4I/edit?gid=0#gid=0';
