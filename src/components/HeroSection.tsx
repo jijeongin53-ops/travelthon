@@ -164,7 +164,7 @@ export default function HeroSection({ onScrollToSection }: HeroSectionProps) {
               <span className="text-xs font-semibold">총 상금 규모</span>
             </div>
             <div className="text-lg sm:text-xl font-black text-white">300만원</div>
-            <p className="text-[11px] text-slate-400 break-keep">대상 1팀 200만원 (부산시장상)</p>
+            <p className="text-[11px] text-slate-400 break-keep">대상 1팀 200만원 (부산관광공사 사장상)</p>
           </div>
 
           <div className="bg-slate-900/50 backdrop-blur-md rounded-xl p-4 border border-slate-800/60 text-left">

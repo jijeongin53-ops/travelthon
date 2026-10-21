@@ -1,5 +1,189 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { globalSubmissionsCache } from '../submit/route';
+import { GOOGLE_SHEET_ID } from '@/lib/google';
+
+// RFC-4180 호환 CSV 파서 (셀 내부 줄바꿈 및 쉼표 처리)
+function parseCsv(csvText: string): string[][] {
+  const rows: string[][] = [];
+  let currentRow: string[] = [];
+  let currentCell = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < csvText.length; i++) {
+    const ch = csvText[i];
+    const nextCh = csvText[i + 1];
+
+    if (inQuotes) {
+      if (ch === '"' && nextCh === '"') {
+        currentCell += '"';
+        i++;
+      } else if (ch === '"') {
+        inQuotes = false;
+      } else {
+        currentCell += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ',') {
+        currentRow.push(currentCell.trim());
+        currentCell = '';
+      } else if (ch === '\r' && nextCh === '\n') {
+        currentRow.push(currentCell.trim());
+        rows.push(currentRow);
+        currentRow = [];
+        currentCell = '';
+        i++;
+      } else if (ch === '\n' || ch === '\r') {
+        currentRow.push(currentCell.trim());
+        rows.push(currentRow);
+        currentRow = [];
+        currentCell = '';
+      } else {
+        currentCell += ch;
+      }
+    }
+  }
+
+  if (currentCell.length > 0 || currentRow.length > 0) {
+    currentRow.push(currentCell.trim());
+    rows.push(currentRow);
+  }
+
+  return rows;
+}
+
+// 연락처 비교를 위한 정규화 함수 (숫자만 남기고 구글 시트 앞자리 0 누락까지 보정)
+function normalizePhone(phoneStr: string): string {
+  return (phoneStr || '').replace(/[^0-9]/g, '').replace(/^0+/, '');
+}
+
+// 구글 시트에서 실시간 접수 내역 조회
+async function findRecordFromGoogleSheet(
+  regNo?: string,
+  name?: string,
+  phone?: string
+) {
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/export?format=csv`;
+  const response = await fetch(csvUrl, { cache: 'no-store' });
+  if (!response.ok) return null;
+
+  const csvText = await response.text();
+  const rows = parseCsv(csvText);
+  if (rows.length <= 1) return null;
+
+  const targetRegNo = regNo?.trim().toUpperCase();
+  const targetName = name?.trim();
+  const targetPhoneNorm = phone ? normalizePhone(phone) : '';
+
+  // 최신 접수 건부터 역순 탐색 (헤더 제외)
+  for (let i = rows.length - 1; i >= 1; i--) {
+    const row = rows[i];
+    if (!row || row.length < 4) continue;
+
+    const rowCreatedAt = row[0] || '';
+    const rowRegNo = (row[1] || '').trim();
+    const rowTeamName = row[2] || '개인';
+    const rowName = (row[3] || '').trim();
+    const rowBirthDate = row[4] || '';
+    const rowUniversity = row[5] || '';
+    const rowGradStatus = row[6] || '재학';
+    const rowPhoneRaw = row[7] || '';
+    const rowEmail = row[8] || '';
+    const rowTeamMembersRaw = row[9] || '';
+    const rowFile1 = row[12] || '';
+    const rowFile2 = row[13] || '';
+    const rowFile3Plus = row[14] || '';
+    const rowStatus = row[15] || '접수 완료';
+
+    let isMatch = false;
+    if (targetRegNo && rowRegNo.toUpperCase() === targetRegNo) {
+      isMatch = true;
+    } else if (
+      targetName &&
+      targetPhoneNorm &&
+      rowName === targetName &&
+      normalizePhone(rowPhoneRaw) === targetPhoneNorm
+    ) {
+      isMatch = true;
+    }
+
+    if (!isMatch) continue;
+
+    // 팀원 문자열 파싱 (예: "1. 부산 (2000-02-02, 동아, 재학)")
+    const parsedMembers = rowTeamMembersRaw
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line && !line.includes('단독 참가'))
+      .map((line, idx) => {
+        const match = line.match(/^\d+\.\s*(.+?)\s*\(([^,]*),\s*([^,]*),\s*([^)]*)\)/);
+        if (match) {
+          return {
+            id: `member-${idx + 1}`,
+            name: match[1].trim(),
+            birthDate: match[2].trim(),
+            university: match[3].trim(),
+            graduationStatus: match[4].trim(),
+          };
+        }
+        return {
+          id: `member-${idx + 1}`,
+          name: line,
+          birthDate: '',
+          university: '',
+          graduationStatus: '',
+        };
+      });
+
+    // 제출 서류 URL 수집
+    const rawUrls = [
+      rowFile1,
+      rowFile2,
+      ...rowFile3Plus.split('\n').map((u) => u.trim()),
+    ].filter((u) => u && u !== '미첨부' && u.startsWith('http'));
+
+    const uploadedFiles = rawUrls.map((url, idx) => ({
+      name: `제출서류_${idx + 1}.pdf`,
+      size: 0,
+      url,
+    }));
+
+    // 앞자리 0이 생략된 전화번호(예: 1064509919) 표시 보정
+    const displayPhone =
+      /^[1-9][0-9]{8,9}$/.test(rowPhoneRaw.trim())
+        ? `0${rowPhoneRaw.trim()}`
+        : rowPhoneRaw;
+
+    return {
+      registrationNumber: rowRegNo,
+      createdAt: rowCreatedAt,
+      data: {
+        name: rowName,
+        birthDate: rowBirthDate,
+        university: rowUniversity,
+        graduationStatus: rowGradStatus,
+        phone: displayPhone,
+        email: rowEmail,
+        teamName: rowTeamName,
+        teamMembers: parsedMembers,
+        applicationFileName: '제출서류_1.pdf',
+        proposalFileName: '제출서류_2.pdf',
+        consentFileName: '제출서류_3.pdf',
+        applicationFileUrl:
+          rawUrls[0] || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId',
+        proposalFileUrl:
+          rawUrls[1] || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId',
+        consentFileUrl:
+          rawUrls[2] || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId',
+        uploadedFiles,
+      },
+      status: rowStatus,
+      storageMode: 'google-sheet',
+    };
+  }
+
+  return null;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,6 +208,11 @@ export async function GET(request: NextRequest) {
       if (globalSubmissionsCache.has(lookupKey)) {
         record = globalSubmissionsCache.get(lookupKey);
       }
+    }
+
+    // 메모리 캐시에 없으면 구글 시트에서 실시간 조회
+    if (!record) {
+      record = await findRecordFromGoogleSheet(regNo, name, phone);
     }
 
     if (!record) {

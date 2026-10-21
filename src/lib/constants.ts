@@ -78,7 +78,7 @@ export const COMPETITION_TRACKS = [
 export const PRIZE_LIST = [
   {
     rank: '대상',
-    prizeName: '부산광역시장상',
+    prizeName: '부산관광공사 사장상',
     count: '1팀',
     reward: '200만원',
     badge: 'Grand Prize',
