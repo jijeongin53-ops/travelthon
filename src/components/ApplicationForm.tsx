@@ -468,7 +468,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
           </h2>
           <p className="text-slate-400 text-sm sm:text-base leading-relaxed break-keep">
             본 대회는 <strong className="text-cyan-300">팀 단위(2인 이상 4인 이하) 참가 필수</strong>이며, 
-            개인 참가는 불가합니다. 인적사항 기재와 기획서/동의서 업로드를 완료하시면 구글 시트 및 구글 드라이브에 안전하게 자동 저장됩니다.
+            개인 참가는 불가합니다. 인적사항 기재와 기획서/동의서 업로드를 완료하시면 시스템에 안전하게 자동 접수됩니다.
           </p>
         </div>
 
@@ -1012,7 +1012,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>구글 드라이브 및 구글 시트로 안전하게 전송 중...</span>
+                    <span>전송 중...</span>
                   </>
                 ) : (
                   <>

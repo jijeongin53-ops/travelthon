@@ -598,49 +598,31 @@ export default function CheckApplicationModal({
                   {result.data?.uploadedFiles && result.data.uploadedFiles.length > 0 ? (
                     result.data.uploadedFiles.map((file: any, idx: number) => (
                       <div key={idx} className="flex items-center justify-between text-xs p-2 rounded-lg bg-slate-900">
-                        <span className="text-slate-300 truncate max-w-[240px]">
+                        <span className="text-slate-300 truncate max-w-[280px]">
                           [서류 {idx + 1}] {file.name}
                         </span>
-                        <a
-                          href={file.url || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-cyan-400 hover:underline flex items-center gap-1 font-semibold"
-                        >
-                          <span>드라이브 열기</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
+                        <span className="text-emerald-400 font-semibold text-[11px] shrink-0">
+                          제출 완료
+                        </span>
                       </div>
                     ))
                   ) : (
                     <>
                       <div className="flex items-center justify-between text-xs p-2 rounded-lg bg-slate-900">
-                        <span className="text-slate-300 truncate max-w-[240px]">
-                          [신청서] {result.data?.applicationFileName || '신청서.docx'}
+                        <span className="text-slate-300 truncate max-w-[280px]">
+                          [신청서] {result.data?.applicationFileName || '신청서.pdf'}
                         </span>
-                        <a
-                          href={result.data?.applicationFileUrl || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-cyan-400 hover:underline flex items-center gap-1 font-semibold"
-                        >
-                          <span>드라이브 열기</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
+                        <span className="text-emerald-400 font-semibold text-[11px] shrink-0">
+                          제출 완료
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-xs p-2 rounded-lg bg-slate-900">
-                        <span className="text-slate-300 truncate max-w-[240px]">
-                          [기획서] {result.data?.proposalFileName || '아이디어계획서.docx'}
+                        <span className="text-slate-300 truncate max-w-[280px]">
+                          [기획서] {result.data?.proposalFileName || '아이디어계획서.pdf'}
                         </span>
-                        <a
-                          href={result.data?.proposalFileUrl || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-cyan-400 hover:underline flex items-center gap-1 font-semibold"
-                        >
-                          <span>드라이브 열기</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
+                        <span className="text-emerald-400 font-semibold text-[11px] shrink-0">
+                          제출 완료
+                        </span>
                       </div>
                     </>
                   )}
@@ -894,14 +876,6 @@ export default function CheckApplicationModal({
                           <span className="text-slate-200 truncate">{file.name}</span>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <a
-                            href={file.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-cyan-400 hover:underline text-[11px]"
-                          >
-                            열기
-                          </a>
                           <button
                             type="button"
                             onClick={() =>
@@ -1007,7 +981,7 @@ export default function CheckApplicationModal({
                   {isSaving ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>구글 드라이브 및 시트에 반영 중...</span>
+                      <span>전송 중...</span>
                     </>
                   ) : (
                     <>
