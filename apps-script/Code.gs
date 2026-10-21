@@ -53,8 +53,8 @@ function doPost(e) {
     var filesPayload = payload.files || {};
     var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
     
-    // 파일 업로드 처리 (최대 5개 PDF 지원)
-    var uploadedFileUrls = [];
+    // 파일 업로드 처리 (최대 5개 PDF 지원, 수정 접수 시 기존 유지 파일 URL 병합)
+    var uploadedFileUrls = Array.isArray(payload.existingFileUrls) ? payload.existingFileUrls.slice() : [];
     var fileList = Array.isArray(filesPayload) ? filesPayload : Object.keys(filesPayload).map(function(k) { return filesPayload[k]; });
     for (var i = 0; i < fileList.length; i++) {
       var f = fileList[i];
