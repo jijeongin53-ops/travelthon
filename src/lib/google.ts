@@ -8,7 +8,9 @@ export const GOOGLE_SHEET_ID =
   process.env.GOOGLE_SHEET_ID || '1n3zQcOOFtX8Bfr0XXZH9X4DDe_Be3JdzgGCWlCbfH4I';
 export const GOOGLE_DRIVE_FOLDER_ID =
   process.env.GOOGLE_DRIVE_FOLDER_ID || '1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId';
-export const GOOGLE_APPS_SCRIPT_URL = process.env.GOOGLE_APPS_SCRIPT_URL || '';
+export const GOOGLE_APPS_SCRIPT_URL =
+  process.env.GOOGLE_APPS_SCRIPT_URL ||
+  'https://script.google.com/macros/s/AKfycbz7wgCXpmfsj8lI7rCrBfVhZN_f29sr7lRkV98tvjhSrdpHRHLnEvT1uqU4yTdSVFTe/exec';
 
 // Google Auth 클라이언트 초기화 함수
 function getGoogleAuthClient() {

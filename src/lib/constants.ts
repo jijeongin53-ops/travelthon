@@ -4,6 +4,11 @@
 export const ADMIN_NOTIFICATION_EMAIL =
   process.env.ADMIN_NOTIFICATION_EMAIL || 'jijeongin53@gmail.com';
 
+// Google Apps Script 웹앱 엔드포인트 (대용량 PDF 클라이언트 직접 전송용, 최대 50MB 지원)
+export const GOOGLE_APPS_SCRIPT_URL =
+  process.env.NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_URL ||
+  'https://script.google.com/macros/s/AKfycbz7wgCXpmfsj8lI7rCrBfVhZN_f29sr7lRkV98tvjhSrdpHRHLnEvT1uqU4yTdSVFTe/exec';
+
 // 구글 시트 및 드라이브 링크
 export const GOOGLE_SHEET_URL =
   'https://docs.google.com/spreadsheets/d/1n3zQcOOFtX8Bfr0XXZH9X4DDe_Be3JdzgGCWlCbfH4I/edit?gid=0#gid=0';

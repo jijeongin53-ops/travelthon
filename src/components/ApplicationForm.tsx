@@ -25,7 +25,13 @@ import {
   Download,
 } from 'lucide-react';
 import { GraduationStatus, GRADUATION_STATUS_LABELS, TeamMember } from '@/lib/types';
-import { GOOGLE_SHEET_URL, GOOGLE_DRIVE_FOLDER_URL, GOOGLE_DRIVE_FORM_FILE_URL } from '@/lib/constants';
+import {
+  GOOGLE_SHEET_URL,
+  GOOGLE_DRIVE_FOLDER_URL,
+  GOOGLE_DRIVE_FORM_FILE_URL,
+  GOOGLE_APPS_SCRIPT_URL,
+  ADMIN_NOTIFICATION_EMAIL,
+} from '@/lib/constants';
 
 interface ApplicationFormProps {
   onOpenPrivacyModal: (type: 'collection' | 'thirdParty') => void;
@@ -121,6 +127,19 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
+
+  // 대용량 파일 안전 Base64 변환 헬퍼 (FileReader 활용으로 콜스택 초과 방지)
+  const fileToBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        const base64 = result.includes(',') ? result.split(',')[1] : result;
+        resolve(base64);
+      };
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
 
   // 파일 추가 핸들러 (다중 파일 및 최대 5개, PDF 전용 검증)
   const handleAddFiles = (fileList: FileList | File[]) => {
@@ -219,6 +238,13 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
       return;
     }
 
+    // 전체 첨부 파일 합산 용량 검증 (최대 35MB까지 허용)
+    const totalFileBytes = uploadedFiles.reduce((acc, f) => acc + f.size, 0);
+    if (totalFileBytes > 35 * 1024 * 1024) {
+      setErrorMessage('첨부 파일의 총 합산 용량은 최대 35MB까지 업로드 가능합니다. PDF 용량을 줄인 후 다시 시도해 주세요.');
+      return;
+    }
+
     // 약관 동의 검증
     if (!agreePrivacy || !agreeThirdParty || !agreeNotice) {
       setErrorMessage('모든 필수 약관에 동의해 주셔야 접수가 진행됩니다.');
@@ -228,7 +254,78 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
     setIsSubmitting(true);
 
     try {
+      // 고유 접수번호 생성 (예: BT26-K9X2-4812)
+      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      const dateCode = Date.now().toString(36).toUpperCase().slice(-4);
+      const registrationNumber = `BT26-${dateCode}-${randomSuffix}`;
+
+      // Vercel 서버리스 함수 용량 제한(4.5MB / 413 Request Entity Too Large)을 우회하기 위해
+      // 클라이언트에서 Google Apps Script(최대 50MB 지원)로 파일 및 신청 데이터를 직접 전송
+      let clientDirectUploaded = false;
+      let uploadedFileUrls: string[] = [];
+
+      if (GOOGLE_APPS_SCRIPT_URL) {
+        try {
+          const filesPayload: Record<string, { name: string; type: string; base64: string }> = {};
+          for (let i = 0; i < uploadedFiles.length; i++) {
+            const file = uploadedFiles[i];
+            const base64 = await fileToBase64(file);
+            filesPayload[`file_${i + 1}`] = {
+              name: file.name,
+              type: file.type || 'application/pdf',
+              base64,
+            };
+          }
+
+          const gasPayload = {
+            registrationNumber,
+            data: {
+              name: name.trim(),
+              birthDate,
+              university: university.trim(),
+              graduationStatus,
+              phone: phone.trim(),
+              email: email.trim(),
+              teamName: teamName.trim(),
+              teamMembers,
+              agreePrivacy,
+              agreeThirdParty,
+              agreeNotice,
+            },
+            files: filesPayload,
+            notificationEmail: ADMIN_NOTIFICATION_EMAIL,
+          };
+
+          // CORS Preflight(OPTIONS) 방지를 위해 text/plain Simple Request로 전송
+          const gasRes = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify(gasPayload),
+          });
+
+          const gasText = await gasRes.text();
+          let gasJson: any = null;
+          try {
+            gasJson = JSON.parse(gasText);
+          } catch {
+            gasJson = null;
+          }
+
+          if (gasRes.ok && gasJson && gasJson.success !== false) {
+            clientDirectUploaded = true;
+            if (Array.isArray(gasJson.uploadedFileUrls)) {
+              uploadedFileUrls = gasJson.uploadedFileUrls;
+            }
+          }
+        } catch (gasErr) {
+          console.warn('클라이언트 직접 업로드 중 경고 (서버 경유 폴백 시도):', gasErr);
+        }
+      }
+
       const formData = new FormData();
+      formData.append('registrationNumber', registrationNumber);
       formData.append('name', name.trim());
       formData.append('birthDate', birthDate);
       formData.append('university', university.trim());
@@ -241,20 +338,53 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
       formData.append('agreeThirdParty', String(agreeThirdParty));
       formData.append('agreeNotice', String(agreeNotice));
 
-      // 서류 파일 일체 전송 (PDF 최대 5개)
-      uploadedFiles.forEach((file) => {
-        formData.append('files', file);
-      });
+      if (clientDirectUploaded) {
+        // Google Apps Script로 직접 업로드가 완료된 경우, 메타데이터만 전송하여 4.5MB 제한(413 에러) 완전 방지
+        formData.append('clientDirectUploaded', 'true');
+        formData.append('uploadedFileUrls', JSON.stringify(uploadedFileUrls));
+        formData.append(
+          'uploadedFilesMeta',
+          JSON.stringify(uploadedFiles.map((f) => ({ name: f.name, size: f.size })))
+        );
+      } else {
+        // 서류 파일 일체 전송 (PDF 최대 5개)
+        uploadedFiles.forEach((file) => {
+          formData.append('files', file);
+        });
+      }
 
       const response = await fetch('/api/submit', {
         method: 'POST',
         body: formData,
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data: any = null;
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        // 만약 클라이언트 직접 업로드가 이미 성공했다면 구글 시트/드라이브 저장은 완료된 상태이므로 정상 완료 처리
+        if (clientDirectUploaded) {
+          data = {
+            success: true,
+            registrationNumber,
+            message: '공모전 참가 신청 및 파일 제출이 성공적으로 완료되었습니다!',
+            details: {
+              teamName: teamName.trim(),
+              leaderName: name.trim(),
+              memberCount: teamMembers.length + 1,
+              email: email.trim(),
+            },
+          };
+        } else if (response.status === 413 || responseText.includes('Request Entity Too Large')) {
+          throw new Error('첨부 파일 용량이 서버 단일 전송 한도를 초과했습니다. 잠시 후 다시 시도하거나 PDF 파일 크기를 줄여주세요.');
+        } else {
+          throw new Error('서버 응답을 처리하는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+        }
+      }
 
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || '접수 처리 중 오류가 발생했습니다.');
+      if (!clientDirectUploaded && (!response.ok || !data?.success)) {
+        throw new Error(data?.message || '접수 처리 중 오류가 발생했습니다.');
       }
 
       // 축하 폭죽 효과 발생
@@ -264,7 +394,21 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
         origin: { y: 0.6 },
       });
 
-      setSuccessData(data);
+      setSuccessData(
+        data?.success
+          ? data
+          : {
+              success: true,
+              registrationNumber,
+              message: '공모전 참가 신청 및 파일 제출이 성공적으로 완료되었습니다!',
+              details: {
+                teamName: teamName.trim(),
+                leaderName: name.trim(),
+                memberCount: teamMembers.length + 1,
+                email: email.trim(),
+              },
+            }
+      );
     } catch (err: any) {
       setErrorMessage(err.message || '접수 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
     } finally {
@@ -751,7 +895,7 @@ export default function ApplicationForm({ onOpenPrivacyModal }: ApplicationFormP
                   </p>
                   <p className="flex items-start gap-1.5">
                     <span className="text-cyan-400 font-bold">•</span>
-                    <span>최대 5개 파일까지 선택 가능하며, 파일이 여러 개일 경우 드래그하여 한 번에 등록하거나 추가 첨부하실 수 있습니다.</span>
+                    <span>최대 5개 파일(합산 최대 35MB)까지 선택 가능하며, 파일이 여러 개일 경우 드래그하여 한 번에 등록하거나 추가 첨부하실 수 있습니다.</span>
                   </p>
                 </div>
               </div>

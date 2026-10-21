@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { uploadFileToDrive, appendRowToSheet, sendViaAppsScript } from '@/lib/google';
+import { uploadFileToDrive, appendRowToSheet, sendViaAppsScript, GOOGLE_APPS_SCRIPT_URL } from '@/lib/google';
 import { ApplicationFormData, GraduationStatus } from '@/lib/types';
 import { ADMIN_NOTIFICATION_EMAIL } from '@/lib/constants';
 
@@ -69,10 +69,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 고유 접수번호 생성 (예: BT26-K9X2-4812)
+    // 고유 접수번호 생성 (예: BT26-K9X2-4812) - 클라이언트에서 생성된 접수번호가 있으면 그대로 사용
+    const clientRegNo = (formData.get('registrationNumber') as string)?.trim();
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const dateCode = Date.now().toString(36).toUpperCase().slice(-4);
-    const registrationNumber = `BT26-${dateCode}-${randomSuffix}`;
+    const registrationNumber = clientRegNo || `BT26-${dateCode}-${randomSuffix}`;
+
+    // 클라이언트에서 Google Apps Script로 대용량 파일 직접 업로드를 완료했는지 여부 확인
+    const clientDirectUploaded = formData.get('clientDirectUploaded') === 'true';
+    const clientUploadedUrlsRaw = formData.get('uploadedFileUrls') as string | null;
+    const clientUploadedMetaRaw = formData.get('uploadedFilesMeta') as string | null;
+
+    let clientUploadedUrls: string[] = [];
+    if (clientUploadedUrlsRaw) {
+      try {
+        clientUploadedUrls = JSON.parse(clientUploadedUrlsRaw);
+      } catch (e) {
+        console.error('클라이언트 업로드 URL 파싱 실패:', e);
+      }
+    }
+
+    let clientUploadedMeta: { name: string; size: number }[] = [];
+    if (clientUploadedMetaRaw) {
+      try {
+        clientUploadedMeta = JSON.parse(clientUploadedMetaRaw);
+      } catch (e) {
+        console.error('클라이언트 업로드 파일 메타데이터 파싱 실패:', e);
+      }
+    }
 
     // 첨부 파일 객체 가져오기 (단일 통합 업로드 및 다중 파일 지원: 최대 5개 PDF)
     const rawFiles = formData.getAll('files') as File[];
@@ -90,7 +114,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 파일 개수 제한 (최대 5개)
-    if (allFiles.length > 5) {
+    if (allFiles.length > 5 || clientUploadedMeta.length > 5) {
       return NextResponse.json(
         { success: false, message: '서류 파일은 한 번에 최대 5개까지만 업로드할 수 있습니다.' },
         { status: 400 }
@@ -111,10 +135,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    let uploadedFileUrls: string[] = [];
-    let applicationFileUrl = '';
-    let proposalFileUrl = '';
-    let consentFileUrl = '';
+    let uploadedFileUrls: string[] = [...clientUploadedUrls];
+    let applicationFileUrl = uploadedFileUrls[0] || '';
+    let proposalFileUrl = uploadedFileUrls[1] || '';
+    let consentFileUrl = uploadedFileUrls[2] || '';
 
     const appData: ApplicationFormData = {
       name,
@@ -136,11 +160,14 @@ export async function POST(request: NextRequest) {
       Boolean(process.env.GOOGLE_PRIVATE_KEY);
 
     // 2. Google Apps Script Webhook 설정 여부
-    const hasAppsScript = Boolean(process.env.GOOGLE_APPS_SCRIPT_URL);
+    const hasAppsScript = Boolean(GOOGLE_APPS_SCRIPT_URL);
 
-    let storageMode = 'demo';
+    let storageMode = clientDirectUploaded ? 'apps-script-direct' : 'demo';
 
-    if (hasServiceAccount) {
+    if (clientDirectUploaded) {
+      // 클라이언트에서 이미 Google Apps Script로 대용량 파일 및 시트 저장을 완료한 경우 중복 전송 생략
+      storageMode = 'apps-script-direct';
+    } else if (hasServiceAccount) {
       try {
         // 구글 드라이브 파일 업로드 (다중 파일 순회)
         for (let i = 0; i < allFiles.length; i++) {
@@ -224,7 +251,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 업로드된 파일 상세 정보 생성
-    const uploadedFilesSummary = allFiles.map((file, idx) => ({
+    const fileItemsForSummary =
+      allFiles.length > 0
+        ? allFiles.map((f) => ({ name: f.name, size: f.size }))
+        : clientUploadedMeta;
+
+    const uploadedFilesSummary = fileItemsForSummary.map((file, idx) => ({
       name: file.name,
       size: file.size,
       url:
@@ -238,9 +270,9 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
       data: {
         ...appData,
-        applicationFileName: allFiles[0]?.name || '신청서_제출됨.pdf',
-        proposalFileName: allFiles[1]?.name || '아이디어기획서_제출됨.pdf',
-        consentFileName: allFiles[2]?.name || '개인정보동의서_제출됨.pdf',
+        applicationFileName: fileItemsForSummary[0]?.name || '신청서_제출됨.pdf',
+        proposalFileName: fileItemsForSummary[1]?.name || '아이디어기획서_제출됨.pdf',
+        consentFileName: fileItemsForSummary[2]?.name || '개인정보동의서_제출됨.pdf',
         applicationFileUrl: applicationFileUrl || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId',
         proposalFileUrl: proposalFileUrl || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId',
         consentFileUrl: consentFileUrl || 'https://drive.google.com/drive/folders/1Vqt_QeOyeBuNpwHqkrCStysIhXeF1YId',
